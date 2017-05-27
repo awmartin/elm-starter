@@ -8314,48 +8314,52 @@ var _user$project$Controllers$update = F2(
 								})
 						}),
 					{ctor: '[]'});
-			default:
+			case 'UpdateInput':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{todoTitleInputState: _p0._0}),
 					{ctor: '[]'});
+			default:
+				var shouldInclude = function (todo) {
+					return !_elm_lang$core$Native_Utils.eq(todo.id, _p0._0);
+				};
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							todos: A2(_elm_lang$core$List$filter, shouldInclude, model.todos)
+						}),
+					{ctor: '[]'});
 		}
 	});
+var _user$project$Controllers$DeleteTodo = function (a) {
+	return {ctor: 'DeleteTodo', _0: a};
+};
 var _user$project$Controllers$UpdateInput = function (a) {
 	return {ctor: 'UpdateInput', _0: a};
 };
 var _user$project$Controllers$NewTodo = {ctor: 'NewTodo'};
 var _user$project$Controllers$Noop = {ctor: 'Noop'};
 
-var _user$project$Views$viewTodo = function (todo) {
+var _user$project$Views$deleteLink = function (todo) {
 	return A2(
-		_elm_lang$html$Html$li,
-		{ctor: '[]'},
+		_elm_lang$html$Html$a,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text(todo.title),
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Views$viewKeyedTodo = function (todo) {
-	return {
-		ctor: '_Tuple2',
-		_0: _elm_lang$core$Basics$toString(todo.id),
-		_1: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewTodo, todo)
-	};
-};
-var _user$project$Views$viewTodoList = function (todoList) {
-	return A2(
-		_elm_lang$html$Html$section,
-		{ctor: '[]'},
+			_0: _elm_lang$html$Html_Events$onClick(
+				_user$project$Controllers$DeleteTodo(todo.id)),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('link'),
+				_1: {ctor: '[]'}
+			}
+		},
 		{
 			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html_Keyed$ul,
-				{ctor: '[]'},
-				A2(_elm_lang$core$List$map, _user$project$Views$viewKeyedTodo, todoList)),
+			_0: _elm_lang$html$Html$text('x'),
 			_1: {ctor: '[]'}
 		});
 };
@@ -8459,6 +8463,44 @@ var _user$project$Views$layout = function (contents) {
 						_1: {ctor: '[]'}
 					}
 				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Views$viewTodo = function (todo) {
+	return A2(
+		_elm_lang$html$Html$li,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(todo.title),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(_user$project$Views$nbsp),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Views$deleteLink(todo),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _user$project$Views$viewKeyedTodo = function (todo) {
+	return {
+		ctor: '_Tuple2',
+		_0: _elm_lang$core$Basics$toString(todo.id),
+		_1: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewTodo, todo)
+	};
+};
+var _user$project$Views$viewTodoList = function (todoList) {
+	return A2(
+		_elm_lang$html$Html$section,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html_Keyed$ul,
+				{ctor: '[]'},
+				A2(_elm_lang$core$List$map, _user$project$Views$viewKeyedTodo, todoList)),
 			_1: {ctor: '[]'}
 		});
 };

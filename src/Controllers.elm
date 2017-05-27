@@ -7,6 +7,7 @@ type Msg =
     Noop
     | NewTodo
     | UpdateInput String
+    | DeleteTodo Int
 
 -- The app's method to handle state changes given a particular message.
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -27,3 +28,11 @@ update msg model =
 
         UpdateInput newTitle ->
             { model | todoTitleInputState = newTitle } ! []
+
+        DeleteTodo id ->
+            let shouldInclude todo =
+                not (todo.id == id)
+            in
+                { model
+                    | todos = List.filter shouldInclude model.todos
+                } ! []

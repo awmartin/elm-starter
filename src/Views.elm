@@ -79,4 +79,15 @@ viewKeyedTodo todo =
 -- This actually draws the <li> tag.
 viewTodo : Todo -> Html Msg
 viewTodo todo =
-    li [] [ text todo.title ]
+    li []
+        [ text todo.title
+        , text nbsp
+        , deleteLink todo
+        ]
+
+deleteLink todo =
+    a
+        [ Events.onClick <| DeleteTodo todo.id
+        , class "link"
+        ]
+        [ text "x" ]
