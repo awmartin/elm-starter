@@ -8275,11 +8275,12 @@ var _user$project$Models$constructTodo = F2(
 var _user$project$Models$emptyModel = {
 	todos: {ctor: '[]'},
 	todoTitleInputState: '',
-	nextId: 1
+	nextId: 1,
+	lastDeletedTodo: _elm_lang$core$Maybe$Nothing
 };
-var _user$project$Models$Model = F3(
-	function (a, b, c) {
-		return {todos: a, todoTitleInputState: b, nextId: c};
+var _user$project$Models$Model = F4(
+	function (a, b, c, d) {
+		return {todos: a, todoTitleInputState: b, nextId: c, lastDeletedTodo: d};
 	});
 var _user$project$Models$Todo = F2(
 	function (a, b) {
@@ -8321,20 +8322,60 @@ var _user$project$Controllers$update = F2(
 						model,
 						{todoTitleInputState: _p0._0}),
 					{ctor: '[]'});
-			default:
+			case 'DeleteTodo':
+				var _p1 = _p0._0;
+				var deletedTodoList = A2(
+					_elm_lang$core$List$filter,
+					function (t) {
+						return _elm_lang$core$Native_Utils.eq(t.id, _p1);
+					},
+					model.todos);
+				var deletedTodo = _elm_lang$core$Native_Utils.eq(
+					_elm_lang$core$List$length(deletedTodoList),
+					1) ? A2(
+					_elm_lang$core$Array$get,
+					0,
+					_elm_lang$core$Array$fromList(deletedTodoList)) : _elm_lang$core$Maybe$Nothing;
 				var shouldInclude = function (todo) {
-					return !_elm_lang$core$Native_Utils.eq(todo.id, _p0._0);
+					return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
 				};
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							todos: A2(_elm_lang$core$List$filter, shouldInclude, model.todos)
+							todos: A2(_elm_lang$core$List$filter, shouldInclude, model.todos),
+							lastDeletedTodo: deletedTodo
 						}),
 					{ctor: '[]'});
+			default:
+				var _p2 = model.lastDeletedTodo;
+				if (_p2.ctor === 'Nothing') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						{ctor: '[]'});
+				} else {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								todos: A2(
+									_elm_lang$core$Basics_ops['++'],
+									model.todos,
+									{
+										ctor: '::',
+										_0: _p2._0,
+										_1: {ctor: '[]'}
+									}),
+								lastDeletedTodo: _elm_lang$core$Maybe$Nothing
+							}),
+						{ctor: '[]'});
+				}
 		}
 	});
+var _user$project$Controllers$UndoDelete = {ctor: 'UndoDelete'};
 var _user$project$Controllers$DeleteTodo = function (a) {
 	return {ctor: 'DeleteTodo', _0: a};
 };
@@ -8359,7 +8400,7 @@ var _user$project$Views$deleteLink = function (todo) {
 		},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text('x'),
+			_0: _elm_lang$html$Html$text('×'),
 			_1: {ctor: '[]'}
 		});
 };
@@ -8504,6 +8545,51 @@ var _user$project$Views$viewTodoList = function (todoList) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Views$viewUndoMessage = function (model) {
+	var _p0 = model.lastDeletedTodo;
+	if (_p0.ctor === 'Nothing') {
+		return A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{ctor: '[]'});
+	} else {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('undo-message'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('Todo deleted.'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(_user$project$Views$nbsp),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$a,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('link'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Controllers$UndoDelete),
+									_1: {ctor: '[]'}
+								}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Undo?'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	}
+};
 var _user$project$Views$view = function (model) {
 	return _user$project$Views$layout(
 		A2(
@@ -8514,8 +8600,12 @@ var _user$project$Views$view = function (model) {
 				_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewInput, model.todoTitleInputState),
 				_1: {
 					ctor: '::',
-					_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewTodoList, model.todos),
-					_1: {ctor: '[]'}
+					_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewUndoMessage, model),
+					_1: {
+						ctor: '::',
+						_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewTodoList, model.todos),
+						_1: {ctor: '[]'}
+					}
 				}
 			}));
 };

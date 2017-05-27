@@ -5,6 +5,7 @@ type alias Model =
     { todos : List Todo
     , todoTitleInputState : String
     , nextId : Int
+    , lastDeletedTodo : Maybe Todo
     }
 
 -- A single todo item.
@@ -19,6 +20,7 @@ emptyModel =
     { todos = []
     , todoTitleInputState = ""
     , nextId = 1
+    , lastDeletedTodo = Nothing
     }
 
 -- A constructor function for todo items.

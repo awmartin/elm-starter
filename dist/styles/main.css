@@ -7,3 +7,7 @@
 .link {
     cursor: pointer;
 }
+.undo-message {
+    padding: 7px;
+    background-color: #ffe;
+}

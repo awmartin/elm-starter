@@ -16,6 +16,7 @@ view : Model -> Html Msg
 view model =
     layout <| div []
         [ lazy viewInput model.todoTitleInputState
+        , lazy viewUndoMessage model
         , lazy viewTodoList model.todos
         ]
 
@@ -36,7 +37,8 @@ layout contents =
 -- Draw the text input field.
 viewInput : String -> Html Msg
 viewInput fieldText =
-    input [ class "new-todo u-full-width input"
+    input
+        [ class "new-todo u-full-width input"
         , placeholder "Enter an item here + press return."
         , autofocus True
         , value fieldText
@@ -85,9 +87,29 @@ viewTodo todo =
         , deleteLink todo
         ]
 
+-- Display the link that will delete a todo.
+deleteLink : Todo -> Html Msg
 deleteLink todo =
     a
         [ Events.onClick <| DeleteTodo todo.id
         , class "link"
         ]
-        [ text "x" ]
+        [ text "×" ]
+
+-- Display a message enabling the user to undo a delete.
+viewUndoMessage : Model -> Html Msg
+viewUndoMessage model =
+    case model.lastDeletedTodo of
+        Nothing ->
+            div [] []
+
+        Just todo ->
+            div [ class "undo-message" ]
+                [ text "Todo deleted."
+                , text nbsp
+                , a
+                    [ class "link"
+                    , Events.onClick UndoDelete
+                    ]
+                    [ text "Undo?" ]
+                ]
