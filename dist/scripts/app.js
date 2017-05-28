@@ -8268,10 +8268,6 @@ var _elm_lang$html$Html_Lazy$lazy3 = _elm_lang$virtual_dom$VirtualDom$lazy3;
 var _elm_lang$html$Html_Lazy$lazy2 = _elm_lang$virtual_dom$VirtualDom$lazy2;
 var _elm_lang$html$Html_Lazy$lazy = _elm_lang$virtual_dom$VirtualDom$lazy;
 
-var _user$project$Models$constructTodo = F2(
-	function (id, title) {
-		return {id: id, title: title};
-	});
 var _user$project$Models$emptyModel = {
 	todos: {ctor: '[]'},
 	todoTitleInputState: '',
@@ -8282,9 +8278,15 @@ var _user$project$Models$Model = F4(
 	function (a, b, c, d) {
 		return {todos: a, todoTitleInputState: b, nextId: c, lastDeletedTodo: d};
 	});
-var _user$project$Models$Todo = F2(
-	function (a, b) {
-		return {id: a, title: b};
+var _user$project$Models$Todo = F3(
+	function (a, b, c) {
+		return {id: a, title: b, state: c};
+	});
+var _user$project$Models$Editing = {ctor: 'Editing'};
+var _user$project$Models$Viewing = {ctor: 'Viewing'};
+var _user$project$Models$constructTodo = F2(
+	function (id, title) {
+		return {id: id, title: title, state: _user$project$Models$Viewing};
 	});
 
 var _user$project$Util$pluck = F2(
@@ -8355,7 +8357,7 @@ var _user$project$Controllers$update = F2(
 							lastDeletedTodo: deletedTodo
 						}),
 					{ctor: '[]'});
-			default:
+			case 'UndoDelete':
 				var _p2 = model.lastDeletedTodo;
 				if (_p2.ctor === 'Nothing') {
 					return A2(
@@ -8373,15 +8375,69 @@ var _user$project$Controllers$update = F2(
 									model.todos,
 									{
 										ctor: '::',
-										_0: _p2._0,
+										_0: _elm_lang$core$Native_Utils.update(
+											_p2._0,
+											{state: _user$project$Models$Viewing}),
 										_1: {ctor: '[]'}
 									}),
 								lastDeletedTodo: _elm_lang$core$Maybe$Nothing
 							}),
 						{ctor: '[]'});
 				}
+			case 'EditTodo':
+				var edit = function (todo) {
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
+						todo,
+						{state: _user$project$Models$Editing}) : todo;
+				};
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							todos: A2(_elm_lang$core$List$map, edit, model.todos)
+						}),
+					{ctor: '[]'});
+			case 'ViewTodo':
+				var view = function (todo) {
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
+						todo,
+						{state: _user$project$Models$Viewing}) : todo;
+				};
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							todos: A2(_elm_lang$core$List$map, view, model.todos)
+						}),
+					{ctor: '[]'});
+			default:
+				var update = function (todo) {
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
+						todo,
+						{title: _p0._1}) : todo;
+				};
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							todos: A2(_elm_lang$core$List$map, update, model.todos)
+						}),
+					{ctor: '[]'});
 		}
 	});
+var _user$project$Controllers$UpdateTodoTitle = F2(
+	function (a, b) {
+		return {ctor: 'UpdateTodoTitle', _0: a, _1: b};
+	});
+var _user$project$Controllers$ViewTodo = function (a) {
+	return {ctor: 'ViewTodo', _0: a};
+};
+var _user$project$Controllers$EditTodo = function (a) {
+	return {ctor: 'EditTodo', _0: a};
+};
 var _user$project$Controllers$UndoDelete = {ctor: 'UndoDelete'};
 var _user$project$Controllers$DeleteTodo = function (a) {
 	return {ctor: 'DeleteTodo', _0: a};
@@ -8427,6 +8483,68 @@ var _user$project$Views$onKeyDown = F2(
 	});
 var _user$project$Views$onEnter = function (msg) {
 	return A2(_user$project$Views$onKeyDown, 13, msg);
+};
+var _user$project$Views$viewTodoTitleInput = function (todo) {
+	var handler = function (newTitle) {
+		return A2(_user$project$Controllers$UpdateTodoTitle, todo.id, newTitle);
+	};
+	return A2(
+		_elm_lang$html$Html$input,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('todo-title-input'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$placeholder('Todo title'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$autofocus(true),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$value(todo.title),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$name('todoTitleInput'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onInput(handler),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Views$onEnter(
+										_user$project$Controllers$ViewTodo(todo.id)),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{ctor: '[]'});
+};
+var _user$project$Views$viewTodoTitle = function (todo) {
+	var _p0 = todo.state;
+	if (_p0.ctor === 'Viewing') {
+		return A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(
+					_user$project$Controllers$EditTodo(todo.id)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('todo-title'),
+					_1: {ctor: '[]'}
+				}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(todo.title),
+				_1: {ctor: '[]'}
+			});
+	} else {
+		return _user$project$Views$viewTodoTitleInput(todo);
+	}
 };
 var _user$project$Views$viewInput = function (fieldText) {
 	return A2(
@@ -8517,10 +8635,14 @@ var _user$project$Views$layout = function (contents) {
 var _user$project$Views$viewTodo = function (todo) {
 	return A2(
 		_elm_lang$html$Html$li,
-		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text(todo.title),
+			_0: _elm_lang$html$Html_Attributes$class('todo'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _user$project$Views$viewTodoTitle(todo),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$html$Html$text(_user$project$Views$nbsp),
@@ -8553,8 +8675,8 @@ var _user$project$Views$viewTodoList = function (todoList) {
 		});
 };
 var _user$project$Views$viewUndoMessage = function (model) {
-	var _p0 = model.lastDeletedTodo;
-	if (_p0.ctor === 'Nothing') {
+	var _p1 = model.lastDeletedTodo;
+	if (_p1.ctor === 'Nothing') {
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},

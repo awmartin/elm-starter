@@ -11,3 +11,6 @@
     padding: 7px;
     background-color: #ffe;
 }
+.todo-title:hover {
+    background-color: #ffe;
+}

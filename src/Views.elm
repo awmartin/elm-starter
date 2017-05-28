@@ -1,7 +1,7 @@
 module Views exposing (view)
 
 import Controllers exposing (Msg(..))
-import Models exposing (Model, Todo)
+import Models exposing (Model, Todo, InterfaceState(..))
 
 import Html exposing (..)
 import Html.Lazy exposing (lazy, lazy2)
@@ -68,9 +68,7 @@ onEnter msg =
 -- Actually draws the list of items.
 viewTodoList : List Todo -> Html Msg
 viewTodoList todoList =
-    section []
-        [ Keyed.ul [] <| List.map viewKeyedTodo todoList
-        ]
+    section [] [ Keyed.ul [] <| List.map viewKeyedTodo todoList ]
 
 -- Provides a "keyed" representation of the list item. This helps Elm implement faster changes
 -- to list-like items.
@@ -81,11 +79,41 @@ viewKeyedTodo todo =
 -- This actually draws the <li> tag.
 viewTodo : Todo -> Html Msg
 viewTodo todo =
-    li []
-        [ text todo.title
+    li [ class "todo" ]
+        [ viewTodoTitle todo
         , text nbsp
         , deleteLink todo
         ]
+
+-- View method that response to the todo's interface state, either the title itself or an <input>.
+viewTodoTitle : Todo -> Html Msg
+viewTodoTitle todo =
+    case todo.state of
+        Viewing ->
+            span
+                [ Events.onClick <| EditTodo todo.id
+                , class "todo-title"
+                ]
+                [ text todo.title ]
+        Editing ->
+            viewTodoTitleInput todo
+
+-- Display an <input> tag for the todo's title.
+viewTodoTitleInput : Todo -> Html Msg
+viewTodoTitleInput todo =
+    let
+        handler : String -> Msg
+        handler newTitle =
+            UpdateTodoTitle todo.id newTitle
+    in
+        input [ class "todo-title-input"
+            , placeholder "Todo title"
+            , autofocus True
+            , value todo.title
+            , name "todoTitleInput"
+            , Events.onInput handler
+            , onEnter <| ViewTodo todo.id
+            ] []
 
 -- Display the link that will delete a todo.
 deleteLink : Todo -> Html Msg

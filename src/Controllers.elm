@@ -1,6 +1,6 @@
 module Controllers exposing (Msg(..), update)
 
-import Models exposing (Model, Todo, constructTodo)
+import Models exposing (Model, Todo, constructTodo, InterfaceState(..))
 import Util exposing (..)
 
 
@@ -11,6 +11,9 @@ type Msg =
     | UpdateInput String
     | DeleteTodo Int
     | UndoDelete
+    | EditTodo Int
+    | ViewTodo Int
+    | UpdateTodoTitle Int String
 
 -- The app's method to handle state changes given a particular message.
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -46,7 +49,41 @@ update msg model =
                 Nothing ->
                     model ! []
                 Just todoToRestore ->
+                    -- Update the interface state as well so we don't undelete in the Editing state.
                     { model
-                        | todos = model.todos ++ [ todoToRestore ]
+                        | todos = model.todos ++ [ { todoToRestore | state = Viewing } ]
                         , lastDeletedTodo = Nothing
                     } ! []
+
+        EditTodo id ->
+            let
+                edit : Todo -> Todo
+                edit todo =
+                    if todo.id == id then
+                        { todo | state = Editing }
+                    else
+                        todo
+            in
+                { model | todos = List.map edit model.todos } ! []
+
+        ViewTodo id ->
+            let
+                view : Todo -> Todo
+                view todo =
+                    if todo.id == id then
+                        { todo | state = Viewing }
+                    else
+                        todo
+            in
+                { model | todos = List.map view model.todos } ! []
+
+        UpdateTodoTitle id newTitle ->
+            let
+                update : Todo -> Todo
+                update todo =
+                    if todo.id == id then
+                        { todo | title = newTitle }
+                    else
+                        todo
+            in
+                { model | todos = List.map update model.todos } ! []

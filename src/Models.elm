@@ -12,7 +12,12 @@ type alias Model =
 type alias Todo =
     { id : Int
     , title : String
+    , state : InterfaceState
     }
+
+type InterfaceState =
+    Viewing
+    | Editing
 
 -- The beginning state of the application.
 emptyModel : Model
@@ -28,4 +33,5 @@ constructTodo : Int -> String -> Todo
 constructTodo id title =
     { id = id
     , title = title
+    , state = Viewing
     }
