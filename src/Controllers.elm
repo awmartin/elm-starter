@@ -1,8 +1,8 @@
 module Controllers exposing (Msg(..), update)
 
 import Models exposing (Model, Todo, constructTodo)
+import Util exposing (..)
 
-import Array
 
 -- The application's "messages" that initiate state changes.
 type Msg =
@@ -34,23 +34,10 @@ update msg model =
 
         DeleteTodo id ->
             let
-                shouldInclude : Todo -> Bool
-                shouldInclude todo =
-                    todo.id /= id
-
-                deletedTodoList : List Todo
-                deletedTodoList =
-                    List.filter (\t -> t.id == id) model.todos
-
-                deletedTodo : Maybe Todo
-                deletedTodo =
-                    if List.length deletedTodoList == 1 then
-                        Array.get 0 <| Array.fromList deletedTodoList
-                    else
-                        Nothing
+                deletedTodo = pluck (\todo -> todo.id == id) model.todos
             in
                 { model
-                    | todos = List.filter shouldInclude model.todos
+                    | todos = List.filter (\todo -> todo.id /= id) model.todos
                     , lastDeletedTodo = deletedTodo
                 } ! []
 

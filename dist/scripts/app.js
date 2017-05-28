@@ -8287,6 +8287,17 @@ var _user$project$Models$Todo = F2(
 		return {id: a, title: b};
 	});
 
+var _user$project$Util$pluck = F2(
+	function (f, items) {
+		var filteredItems = A2(_elm_lang$core$List$filter, f, items);
+		return (_elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$List$length(filteredItems),
+			0) > 0) ? A2(
+			_elm_lang$core$Array$get,
+			0,
+			_elm_lang$core$Array$fromList(filteredItems)) : _elm_lang$core$Maybe$Nothing;
+	});
+
 var _user$project$Controllers$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
@@ -8324,27 +8335,23 @@ var _user$project$Controllers$update = F2(
 					{ctor: '[]'});
 			case 'DeleteTodo':
 				var _p1 = _p0._0;
-				var deletedTodoList = A2(
-					_elm_lang$core$List$filter,
-					function (t) {
-						return _elm_lang$core$Native_Utils.eq(t.id, _p1);
+				var deletedTodo = A2(
+					_user$project$Util$pluck,
+					function (todo) {
+						return _elm_lang$core$Native_Utils.eq(todo.id, _p1);
 					},
 					model.todos);
-				var deletedTodo = _elm_lang$core$Native_Utils.eq(
-					_elm_lang$core$List$length(deletedTodoList),
-					1) ? A2(
-					_elm_lang$core$Array$get,
-					0,
-					_elm_lang$core$Array$fromList(deletedTodoList)) : _elm_lang$core$Maybe$Nothing;
-				var shouldInclude = function (todo) {
-					return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
-				};
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							todos: A2(_elm_lang$core$List$filter, shouldInclude, model.todos),
+							todos: A2(
+								_elm_lang$core$List$filter,
+								function (todo) {
+									return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
+								},
+								model.todos),
 							lastDeletedTodo: deletedTodo
 						}),
 					{ctor: '[]'});
