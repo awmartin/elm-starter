@@ -1,8 +1,9 @@
 port module App exposing (..)
 
 import Views
-import Controllers exposing (Msg)
-import Models exposing (Model, emptyModel)
+import Msg exposing (Msg)
+import Model exposing (Model, emptyModel)
+import Update exposing (update)
 
 import Html exposing (..)
 
@@ -13,11 +14,11 @@ main =
     Html.program
         { init = init
         , view = Views.view
-        , update = Controllers.update
+        , update = update
         , subscriptions = \_ -> Sub.none
         }
 
 -- Describe the initial state and startup operations to the runtime.
 init : ( Model, Cmd Msg )
 init =
-    Models.emptyModel ! []
+    Model.emptyModel ! []

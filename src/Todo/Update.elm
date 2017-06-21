@@ -1,30 +1,20 @@
-module Controllers exposing (Msg(..), update)
+module Todo.Update exposing (..)
 
-import Models exposing (Model, Todo, constructTodo, InterfaceState(..))
+import Msg exposing (Msg)
+import Model exposing (Model)
+import InterfaceState exposing (InterfaceState(..))
 import Util exposing (..)
 
+import Todo.Model exposing (Todo, constructTodo)
+import Todo.Msg exposing (TodoAction(..))
 
--- The application's "messages" that initiate state changes.
-type Msg =
-    Noop
-    | NewTodo
-    | UpdateInput String
-    | DeleteTodo Int
-    | UndoDelete
-    | EditTodo Int
-    | ViewTodo Int
-    | UpdateTodoTitle Int String
 
--- The app's method to handle state changes given a particular message.
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+handleTodoAction : TodoAction -> Model -> (Model, Cmd Msg)
+handleTodoAction msg model =
     case msg of
-        Noop ->
-            model ! []
-
         NewTodo ->
             let newTodo =
-                Models.constructTodo model.nextId model.todoTitleInputState
+                constructTodo model.nextId model.todoTitleInputState
             in
                 { model
                     | nextId = model.nextId + 1
@@ -32,8 +22,6 @@ update msg model =
                     , todos = model.todos ++ [ newTodo ]
                 } ! []
 
-        UpdateInput newTitle ->
-            { model | todoTitleInputState = newTitle } ! []
 
         DeleteTodo id ->
             let
