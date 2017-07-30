@@ -1,4 +1,4 @@
-module InterfaceState exposing (..)
+module Todo.InterfaceState exposing (..)
 
 type InterfaceState =
     Viewing

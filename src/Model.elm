@@ -1,7 +1,6 @@
 module Model exposing (..)
 
 import Todo.Model exposing (Todo)
-import InterfaceState exposing (InterfaceState)
 
 -- The application state.
 type alias Model =

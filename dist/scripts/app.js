@@ -8292,12 +8292,12 @@ var _user$project$Msg$UpdateInput = function (a) {
 };
 var _user$project$Msg$Noop = {ctor: 'Noop'};
 
-var _user$project$InterfaceState$Editing = {ctor: 'Editing'};
-var _user$project$InterfaceState$Viewing = {ctor: 'Viewing'};
+var _user$project$Todo_InterfaceState$Editing = {ctor: 'Editing'};
+var _user$project$Todo_InterfaceState$Viewing = {ctor: 'Viewing'};
 
 var _user$project$Todo_Model$constructTodo = F2(
 	function (id, title) {
-		return {id: id, title: title, state: _user$project$InterfaceState$Viewing};
+		return {id: id, title: title, state: _user$project$Todo_InterfaceState$Viewing};
 	});
 var _user$project$Todo_Model$Todo = F3(
 	function (a, b, c) {
@@ -8689,7 +8689,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 										ctor: '::',
 										_0: _elm_lang$core$Native_Utils.update(
 											_p2._0,
-											{state: _user$project$InterfaceState$Viewing}),
+											{state: _user$project$Todo_InterfaceState$Viewing}),
 										_1: {ctor: '[]'}
 									}),
 								lastDeletedTodo: _elm_lang$core$Maybe$Nothing
@@ -8700,7 +8700,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 				var edit = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
 						todo,
-						{state: _user$project$InterfaceState$Editing}) : todo;
+						{state: _user$project$Todo_InterfaceState$Editing}) : todo;
 				};
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -8714,7 +8714,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 				var view = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
 						todo,
-						{state: _user$project$InterfaceState$Viewing}) : todo;
+						{state: _user$project$Todo_InterfaceState$Viewing}) : todo;
 				};
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -8741,7 +8741,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 		}
 	});
 
-var _user$project$Controllers$update = F2(
+var _user$project$Update$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
 		switch (_p0.ctor) {
@@ -8770,7 +8770,7 @@ var _user$project$App$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$App$init,
 		view: _user$project$Views$view,
-		update: _user$project$Controllers$update,
+		update: _user$project$Update$update,
 		subscriptions: function (_p0) {
 			return _elm_lang$core$Platform_Sub$none;
 		}

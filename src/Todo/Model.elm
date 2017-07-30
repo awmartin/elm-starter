@@ -1,6 +1,5 @@
 module Todo.Model exposing (..)
-
-import InterfaceState exposing (InterfaceState(..))
+import Todo.InterfaceState exposing (InterfaceState(..))
 
 -- A single todo item.
 type alias Todo =

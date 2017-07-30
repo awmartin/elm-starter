@@ -1,9 +1,10 @@
 module Todo.View exposing (..)
 
 import Todo.Model exposing (Todo)
-import InterfaceState exposing (InterfaceState(..))
-import Msg exposing (Msg(..))
 import Todo.Msg exposing (TodoAction(..))
+import Todo.InterfaceState exposing (InterfaceState(..))
+
+import Msg exposing (Msg(..))
 import Util
 
 import Html exposing (..)

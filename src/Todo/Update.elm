@@ -2,11 +2,11 @@ module Todo.Update exposing (..)
 
 import Msg exposing (Msg)
 import Model exposing (Model)
-import InterfaceState exposing (InterfaceState(..))
 import Util exposing (..)
 
 import Todo.Model exposing (Todo, constructTodo)
 import Todo.Msg exposing (TodoAction(..))
+import Todo.InterfaceState exposing (InterfaceState(..))
 
 
 handleTodoAction : TodoAction -> Model -> (Model, Cmd Msg)
@@ -21,7 +21,6 @@ handleTodoAction msg model =
                     , todoTitleInputState = ""
                     , todos = model.todos ++ [ newTodo ]
                 } ! []
-
 
         DeleteTodo id ->
             let
