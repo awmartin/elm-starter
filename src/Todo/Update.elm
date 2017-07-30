@@ -1,4 +1,4 @@
-module Todo.Update exposing (..)
+port module Todo.Update exposing (..)
 
 import Msg exposing (Msg)
 import Model exposing (Model)
@@ -7,40 +7,41 @@ import Util exposing (..)
 import Todo.Model exposing (Todo, constructTodo)
 import Todo.Msg exposing (TodoAction(..))
 import Todo.InterfaceState exposing (InterfaceState(..))
+import Todo.Firebase exposing (TodoFirebase)
 
+
+port onNewTodo : TodoFirebase -> Cmd msg
+port onUpdateTodo : TodoFirebase -> Cmd msg
+port onDeleteTodo : String -> Cmd msg
 
 handleTodoAction : TodoAction -> Model -> (Model, Cmd Msg)
 handleTodoAction msg model =
     case msg of
         NewTodo ->
             let newTodo =
-                constructTodo model.nextId model.todoTitleInputState
+                constructTodo "" model.todoTitleInputState
             in
-                { model
-                    | nextId = model.nextId + 1
-                    , todoTitleInputState = ""
-                    , todos = model.todos ++ [ newTodo ]
-                } ! []
+                -- Just update the model's UI state. Let Firebase take care of the data.
+                ({ model
+                    | todoTitleInputState = ""
+                },
+                onNewTodo { id = "", title = newTodo.title })
 
         DeleteTodo id ->
             let
                 deletedTodo = pluck (\todo -> todo.id == id) model.todos
             in
-                { model
-                    | todos = List.filter (\todo -> todo.id /= id) model.todos
-                    , lastDeletedTodo = deletedTodo
-                } ! []
+                ({ model
+                    | lastDeletedTodo = deletedTodo
+                }, onDeleteTodo id)
 
         UndoDelete ->
             case model.lastDeletedTodo of
                 Nothing ->
                     model ! []
                 Just todoToRestore ->
-                    -- Update the interface state as well so we don't undelete in the Editing state.
-                    { model
-                        | todos = model.todos ++ [ { todoToRestore | state = Viewing } ]
-                        , lastDeletedTodo = Nothing
-                    } ! []
+                    ({ model | lastDeletedTodo = Nothing }
+                    , onNewTodo {id = "", title = todoToRestore.title})
 
         EditTodo id ->
             let
@@ -55,14 +56,20 @@ handleTodoAction msg model =
 
         ViewTodo id ->
             let
-                view : Todo -> Todo
-                view todo =
-                    if todo.id == id then
-                        { todo | state = Viewing }
-                    else
-                        todo
+                todo = pluck (\todo -> todo.id == id) model.todos
+                --view : Todo -> Todo
+                --view todo =
+                --    if todo.id == id then
+                --        { todo | state = Viewing }
+                --    else
+                --        todo
             in
-                { model | todos = List.map view model.todos } ! []
+                case todo of
+                    Nothing ->
+                        model ! []
+                    Just todo ->
+                        ( model, onUpdateTodo (TodoFirebase id todo.title) )
+                --{ model | todos = List.map view model.todos } ! []
 
         UpdateTodoTitle id newTitle ->
             let
@@ -73,4 +80,6 @@ handleTodoAction msg model =
                     else
                         todo
             in
+                -- Don't update Firebase.
                 { model | todos = List.map update model.todos } ! []
+

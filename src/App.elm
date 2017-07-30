@@ -5,6 +5,8 @@ import Msg exposing (Msg)
 import Model exposing (Model, emptyModel)
 import Update exposing (update)
 
+import Todo.Firebase exposing (TodoFirebase)
+
 import Html exposing (..)
 
 -- Somehow Elm knows this is the entry point for the application.
@@ -15,10 +17,18 @@ main =
         { init = init
         , view = Views.view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
 
 -- Describe the initial state and startup operations to the runtime.
 init : ( Model, Cmd Msg )
 init =
     Model.emptyModel ! []
+
+port todos : (List TodoFirebase -> msg) -> Sub msg
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    -- Can do some if-statement magic here if necessary.
+    todos Msg.FirebaseUpdate
+

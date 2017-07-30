@@ -34,3 +34,7 @@ Temporary Items
 .apdisk
 
 # End of https://www.gitignore.io/api/elm,macos
+
+# Ignore the Firebase config
+config.js
+

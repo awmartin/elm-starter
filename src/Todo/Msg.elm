@@ -2,8 +2,8 @@ module Todo.Msg exposing (TodoAction(..))
 
 type TodoAction =
     NewTodo
-    | DeleteTodo Int
+    | DeleteTodo String
     | UndoDelete
-    | EditTodo Int
-    | ViewTodo Int
-    | UpdateTodoTitle Int String
+    | EditTodo String
+    | ViewTodo String
+    | UpdateTodoTitle String String

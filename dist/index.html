@@ -5,7 +5,10 @@
   <meta charset="UTF-8">
   <title>Elm | Starter</title>
 
+
+  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
   <script type="text/javascript" src="scripts/app.js"></script>
+  <script type="text/javascript" src="scripts/config.js"></script>
 
   <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="styles/skeleton/normalize.css">
@@ -15,10 +18,148 @@
 </head>
 
 <body>
+    <div class="container">
+        <div class="row">
+            <div class="six columns">&nbsp;</div>
+            <div class="six columns">
+                Sign in with Google
+                <button disabled class="" id="quickstart-sign-in">Sign in</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app"></div>
+
+  <script>
+    // Initialize Firebase
+    firebase.initializeApp(config());
+
+    /**
+     * Function called when clicking the Login/Logout button.
+     */
+    // [START buttoncallback]
+    function toggleSignIn() {
+      if (!firebase.auth().currentUser) {
+        var provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+
+        firebase.auth().signInWithPopup(provider).then(function(result) {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = result.credential.accessToken;
+
+          // The signed-in user info.
+          var user = result.user;
+
+          // document.getElementById('quickstart-oauthtoken').textContent = token;
+
+        }).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+
+          if (errorCode === 'auth/account-exists-with-different-credential') {
+            alert('You have already signed up with a different auth provider for that email.');
+            // If you are using multiple auth providers on your app you should handle linking
+            // the user's accounts here.
+          } else {
+            console.error(error);
+          }
+        });
+      } else {
+        firebase.auth().signOut();
+      }
+      document.getElementById('quickstart-sign-in').disabled = true;
+    }
+
+    /**
+     * initApp handles setting up UI event listeners and registering Firebase auth listeners:
+     *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
+     *    out, and that is where we update the UI.
+     */
+    function initApp() {
+      // Listening for auth state changes.
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          var displayName = user.displayName;
+          var email = user.email;
+          var emailVerified = user.emailVerified;
+          var photoURL = user.photoURL;
+          var isAnonymous = user.isAnonymous;
+          var uid = user.uid;
+          var providerData = user.providerData;
+
+          // document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
+          document.getElementById('quickstart-sign-in').textContent = 'Sign out';
+          // document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
+
+          initializeElmApp();
+        } else {
+          // User is signed out.
+          // document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
+          document.getElementById('quickstart-sign-in').textContent = 'Sign in';
+          // document.getElementById('quickstart-account-details').textContent = 'null';
+          // document.getElementById('quickstart-oauthtoken').textContent = 'null';
+        }
+
+        document.getElementById('quickstart-sign-in').disabled = false;
+
+        closeElmApp();
+      });
+
+      document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
+    }
+
+    function initializeElmApp() {
+        var node = document.getElementById('app');
+        var app = Elm.App.embed(node);
+
+        app.ports.onNewTodo.subscribe(function(todo) {
+            delete todo.id;
+            var ref = firebase.database().ref('todos');
+            ref.push(todo);
+        });
+
+        app.ports.onUpdateTodo.subscribe(function(todo) {
+            var path = 'todos/' + todo.id;
+            delete todo.id;
+            var ref = firebase.database().ref(path);
+            ref.update(todo);
+        });
+
+        app.ports.onDeleteTodo.subscribe(function(key) {
+            var path = 'todos/' + key;
+            var ref = firebase.database().ref(path);
+            ref.remove();
+        });
+
+        firebase.database().ref('todos').on('value', function(snapshot){
+            var val = snapshot.val();
+            var list = [];
+            for (var key in val) {
+                if (val.hasOwnProperty(key)) {
+                    var todo = val[key];
+                    todo.id = key;
+                    list.push(todo);
+                }
+            }
+            app.ports.todos.send(list);
+        });
+    }
+
+    function closeElmApp() {
+        var node = document.getElementById('app');
+        node.innerHTML = "";
+    }
+
+    window.onload = function() {
+      initApp();
+    };
+  </script>
 </body>
-
-<script type="text/javascript">
-    Elm.App.fullscreen();
-</script>
-
 </html>

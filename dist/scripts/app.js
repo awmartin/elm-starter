@@ -8284,6 +8284,14 @@ var _user$project$Todo_Msg$DeleteTodo = function (a) {
 };
 var _user$project$Todo_Msg$NewTodo = {ctor: 'NewTodo'};
 
+var _user$project$Todo_Firebase$TodoFirebase = F2(
+	function (a, b) {
+		return {id: a, title: b};
+	});
+
+var _user$project$Msg$FirebaseUpdate = function (a) {
+	return {ctor: 'FirebaseUpdate', _0: a};
+};
 var _user$project$Msg$TodoMsg = function (a) {
 	return {ctor: 'TodoMsg', _0: a};
 };
@@ -8446,7 +8454,19 @@ var _user$project$Todo_View$viewTodo = function (todo) {
 				_1: {
 					ctor: '::',
 					_0: _user$project$Todo_View$deleteLink(todo),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_user$project$Util$nbsp),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'(',
+									A2(_elm_lang$core$Basics_ops['++'], todo.id, ')'))),
+							_1: {ctor: '[]'}
+						}
+					}
 				}
 			}
 		});
@@ -8624,29 +8644,35 @@ var _user$project$Views$view = function (model) {
 			}));
 };
 
+var _user$project$Todo_Update$onNewTodo = _elm_lang$core$Native_Platform.outgoingPort(
+	'onNewTodo',
+	function (v) {
+		return {id: v.id, title: v.title};
+	});
+var _user$project$Todo_Update$onUpdateTodo = _elm_lang$core$Native_Platform.outgoingPort(
+	'onUpdateTodo',
+	function (v) {
+		return {id: v.id, title: v.title};
+	});
+var _user$project$Todo_Update$onDeleteTodo = _elm_lang$core$Native_Platform.outgoingPort(
+	'onDeleteTodo',
+	function (v) {
+		return v;
+	});
 var _user$project$Todo_Update$handleTodoAction = F2(
 	function (msg, model) {
 		var _p0 = msg;
 		switch (_p0.ctor) {
 			case 'NewTodo':
-				var newTodo = A2(_user$project$Todo_Model$constructTodo, model.nextId, model.todoTitleInputState);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+				var newTodo = A2(_user$project$Todo_Model$constructTodo, '', model.todoTitleInputState);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{
-							nextId: model.nextId + 1,
-							todoTitleInputState: '',
-							todos: A2(
-								_elm_lang$core$Basics_ops['++'],
-								model.todos,
-								{
-									ctor: '::',
-									_0: newTodo,
-									_1: {ctor: '[]'}
-								})
-						}),
-					{ctor: '[]'});
+						{todoTitleInputState: ''}),
+					_1: _user$project$Todo_Update$onNewTodo(
+						{id: '', title: newTodo.title})
+				};
 			case 'DeleteTodo':
 				var _p1 = _p0._0;
 				var deletedTodo = A2(
@@ -8655,20 +8681,13 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						return _elm_lang$core$Native_Utils.eq(todo.id, _p1);
 					},
 					model.todos);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{
-							todos: A2(
-								_elm_lang$core$List$filter,
-								function (todo) {
-									return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
-								},
-								model.todos),
-							lastDeletedTodo: deletedTodo
-						}),
-					{ctor: '[]'});
+						{lastDeletedTodo: deletedTodo}),
+					_1: _user$project$Todo_Update$onDeleteTodo(_p1)
+				};
 			case 'UndoDelete':
 				var _p2 = model.lastDeletedTodo;
 				if (_p2.ctor === 'Nothing') {
@@ -8677,24 +8696,14 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						model,
 						{ctor: '[]'});
 				} else {
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						_elm_lang$core$Native_Utils.update(
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								todos: A2(
-									_elm_lang$core$Basics_ops['++'],
-									model.todos,
-									{
-										ctor: '::',
-										_0: _elm_lang$core$Native_Utils.update(
-											_p2._0,
-											{state: _user$project$Todo_InterfaceState$Viewing}),
-										_1: {ctor: '[]'}
-									}),
-								lastDeletedTodo: _elm_lang$core$Maybe$Nothing
-							}),
-						{ctor: '[]'});
+							{lastDeletedTodo: _elm_lang$core$Maybe$Nothing}),
+						_1: _user$project$Todo_Update$onNewTodo(
+							{id: '', title: _p2._0.title})
+					};
 				}
 			case 'EditTodo':
 				var edit = function (todo) {
@@ -8711,19 +8720,27 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						}),
 					{ctor: '[]'});
 			case 'ViewTodo':
-				var view = function (todo) {
-					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
-						todo,
-						{state: _user$project$Todo_InterfaceState$Viewing}) : todo;
-				};
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+				var _p4 = _p0._0;
+				var todo = A2(
+					_user$project$Util$pluck,
+					function (todo) {
+						return _elm_lang$core$Native_Utils.eq(todo.id, _p4);
+					},
+					model.todos);
+				var _p3 = todo;
+				if (_p3.ctor === 'Nothing') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
 						model,
-						{
-							todos: A2(_elm_lang$core$List$map, view, model.todos)
-						}),
-					{ctor: '[]'});
+						{ctor: '[]'});
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _user$project$Todo_Update$onUpdateTodo(
+							A2(_user$project$Todo_Firebase$TodoFirebase, _p4, _p3._0.title))
+					};
+				}
 			default:
 				var update = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
@@ -8752,12 +8769,23 @@ var _user$project$Update$update = F2(
 					{ctor: '[]'});
 			case 'TodoMsg':
 				return A2(_user$project$Todo_Update$handleTodoAction, _p0._0, model);
-			default:
+			case 'UpdateInput':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{todoTitleInputState: _p0._0}),
+					{ctor: '[]'});
+			default:
+				var makeTodo = function (fodo) {
+					return A2(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title);
+				};
+				var todoList = A2(_elm_lang$core$List$map, makeTodo, _p0._0);
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{todos: todoList}),
 					{ctor: '[]'});
 		}
 	});
@@ -8766,15 +8794,26 @@ var _user$project$App$init = A2(
 	_elm_lang$core$Platform_Cmd_ops['!'],
 	_user$project$Model$emptyModel,
 	{ctor: '[]'});
+var _user$project$App$todos = _elm_lang$core$Native_Platform.incomingPort(
+	'todos',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (id) {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (title) {
+						return _elm_lang$core$Json_Decode$succeed(
+							{id: id, title: title});
+					},
+					A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+			},
+			A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
+var _user$project$App$subscriptions = function (model) {
+	return _user$project$App$todos(_user$project$Msg$FirebaseUpdate);
+};
 var _user$project$App$main = _elm_lang$html$Html$program(
-	{
-		init: _user$project$App$init,
-		view: _user$project$Views$view,
-		update: _user$project$Update$update,
-		subscriptions: function (_p0) {
-			return _elm_lang$core$Platform_Sub$none;
-		}
-	})();
+	{init: _user$project$App$init, view: _user$project$Views$view, update: _user$project$Update$update, subscriptions: _user$project$App$subscriptions})();
 
 var Elm = {};
 Elm['App'] = Elm['App'] || {};
