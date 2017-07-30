@@ -1,12 +1,14 @@
-# Elm Init
+# Elm Starter
 
 A simple sample for getting started with Elm or the simplest project starter ever.
 
 All it does it produce an text input for making a list of stuff, even more stripped down than [TodoMVC](https://github.com/evancz/elm-todomvc), which is a bit difficult to parse for beginners who learn best by example. It also demonstrates how to use Elm modules, which TodoMVC doesn't.
 
+It also shows how to build the CRUD operations and use various Elm features incrementally. Just follow along with the tags and commits, starting at the first commit, which has working functionality to create todos.
+
 ## Getting Started
 
-This assumes you have Elm installed. Just install the repo and run `./build`.
+This assumes you have Elm installed. Just clone the repo and run `./build`.
 
 If you want to use the provided `watch` script, it depends on `fswatch`.
 
