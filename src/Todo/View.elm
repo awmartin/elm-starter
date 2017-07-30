@@ -33,8 +33,6 @@ viewTodo todo =
         [ viewTodoTitle todo
         , text Util.nbsp
         , deleteLink todo
-        , text Util.nbsp
-        , text ("(" ++ todo.id ++ ")")
         ]
 
 -- View method that response to the todo's interface state, either the title itself or an <input>.

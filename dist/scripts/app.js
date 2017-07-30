@@ -8454,19 +8454,7 @@ var _user$project$Todo_View$viewTodo = function (todo) {
 				_1: {
 					ctor: '::',
 					_0: _user$project$Todo_View$deleteLink(todo),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(_user$project$Util$nbsp),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									'(',
-									A2(_elm_lang$core$Basics_ops['++'], todo.id, ')'))),
-							_1: {ctor: '[]'}
-						}
-					}
+					_1: {ctor: '[]'}
 				}
 			}
 		});
