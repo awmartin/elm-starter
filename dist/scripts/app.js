@@ -8709,6 +8709,11 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 					{ctor: '[]'});
 			case 'ViewTodo':
 				var _p4 = _p0._0;
+				var view = function (todo) {
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p4) ? _elm_lang$core$Native_Utils.update(
+						todo,
+						{state: _user$project$Todo_InterfaceState$Viewing}) : todo;
+				};
 				var todo = A2(
 					_user$project$Util$pluck,
 					function (todo) {
@@ -8724,7 +8729,11 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 				} else {
 					return {
 						ctor: '_Tuple2',
-						_0: model,
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								todos: A2(_elm_lang$core$List$map, view, model.todos)
+							}),
 						_1: _user$project$Todo_Update$onUpdateTodo(
 							A2(_user$project$Todo_Firebase$TodoFirebase, _p4, _p3._0.title))
 					};

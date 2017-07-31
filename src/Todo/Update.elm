@@ -57,19 +57,21 @@ handleTodoAction msg model =
         ViewTodo id ->
             let
                 todo = pluck (\todo -> todo.id == id) model.todos
-                --view : Todo -> Todo
-                --view todo =
-                --    if todo.id == id then
-                --        { todo | state = Viewing }
-                --    else
-                --        todo
+                view : Todo -> Todo
+                view todo =
+                    if todo.id == id then
+                        { todo | state = Viewing }
+                    else
+                        todo
             in
                 case todo of
                     Nothing ->
                         model ! []
                     Just todo ->
-                        ( model, onUpdateTodo (TodoFirebase id todo.title) )
-                --{ model | todos = List.map view model.todos } ! []
+                        -- TODO Ensure the interface state is set to view, if the title hasn't
+                        -- changed.
+                        ( { model | todos = List.map view model.todos }
+                          , onUpdateTodo (TodoFirebase id todo.title) )
 
         UpdateTodoTitle id newTitle ->
             let
