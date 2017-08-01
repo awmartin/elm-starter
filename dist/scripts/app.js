@@ -8308,11 +8308,12 @@ var _user$project$Model$emptyModel = {
 	todos: {ctor: '[]'},
 	todoTitleInputState: '',
 	nextId: 1,
-	lastDeletedTodo: _elm_lang$core$Maybe$Nothing
+	lastDeletedTodo: _elm_lang$core$Maybe$Nothing,
+	messages: {ctor: '[]'}
 };
-var _user$project$Model$Model = F4(
-	function (a, b, c, d) {
-		return {todos: a, todoTitleInputState: b, nextId: c, lastDeletedTodo: d};
+var _user$project$Model$Model = F5(
+	function (a, b, c, d, e) {
+		return {todos: a, todoTitleInputState: b, nextId: c, lastDeletedTodo: d, messages: e};
 	});
 
 var _user$project$Util$pluck = F2(
@@ -8553,7 +8554,67 @@ var _user$project$Views$viewInput = function (fieldText) {
 		},
 		{ctor: '[]'});
 };
-var _user$project$Views$layout = function (contents) {
+var _user$project$Views$viewMessage = function (message) {
+	var content = function () {
+		var _p1 = message;
+		switch (_p1.ctor) {
+			case 'Noop':
+				return _elm_lang$html$Html$text('Noop');
+			case 'TodoMsg':
+				var _p2 = _p1._0;
+				switch (_p2.ctor) {
+					case 'NewTodo':
+						return _elm_lang$html$Html$text('NewTodo');
+					case 'DeleteTodo':
+						return _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'DeleteTodo',
+								_elm_lang$core$Basics$toString(_p2._0)));
+					case 'UndoDelete':
+						return _elm_lang$html$Html$text('UndoDelete');
+					case 'EditTodo':
+						return _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'EditTodo',
+								_elm_lang$core$Basics$toString(_p2._0)));
+					case 'ViewTodo':
+						return _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'ViewTodo',
+								_elm_lang$core$Basics$toString(_p2._0)));
+					default:
+						return _elm_lang$html$Html$text(
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'UpdateTodoTitle',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_elm_lang$core$Basics$toString(_p2._0),
+									_p2._1)));
+				}
+			default:
+				return _elm_lang$html$Html$text('UpdateInput');
+		}
+	}();
+	return A2(
+		_elm_lang$html$Html$li,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: content,
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Views$viewMessageStream = function (messages) {
+	return A2(
+		_elm_lang$html$Html$ul,
+		{ctor: '[]'},
+		A2(_elm_lang$core$List$map, _user$project$Views$viewMessage, messages));
+};
+var _user$project$Views$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -8595,33 +8656,37 @@ var _user$project$Views$layout = function (contents) {
 							},
 							{
 								ctor: '::',
-								_0: contents,
-								_1: {ctor: '[]'}
+								_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewInput, model.todoTitleInputState),
+								_1: {
+									ctor: '::',
+									_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewUndoMessage, model),
+									_1: {
+										ctor: '::',
+										_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Todo_View$viewTodoList, model.todos),
+										_1: {ctor: '[]'}
+									}
+								}
 							}),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('three columns'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _user$project$Views$viewMessageStream(model.messages),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}
 				}),
 			_1: {ctor: '[]'}
 		});
-};
-var _user$project$Views$view = function (model) {
-	return _user$project$Views$layout(
-		A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			{
-				ctor: '::',
-				_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewInput, model.todoTitleInputState),
-				_1: {
-					ctor: '::',
-					_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewUndoMessage, model),
-					_1: {
-						ctor: '::',
-						_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Todo_View$viewTodoList, model.todos),
-						_1: {ctor: '[]'}
-					}
-				}
-			}));
 };
 
 var _user$project$Todo_Update$handleTodoAction = F2(
@@ -8630,23 +8695,20 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 		switch (_p0.ctor) {
 			case 'NewTodo':
 				var newTodo = A2(_user$project$Todo_Model$constructTodo, model.nextId, model.todoTitleInputState);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							nextId: model.nextId + 1,
-							todoTitleInputState: '',
-							todos: A2(
-								_elm_lang$core$Basics_ops['++'],
-								model.todos,
-								{
-									ctor: '::',
-									_0: newTodo,
-									_1: {ctor: '[]'}
-								})
-						}),
-					{ctor: '[]'});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						nextId: model.nextId + 1,
+						todoTitleInputState: '',
+						todos: A2(
+							_elm_lang$core$Basics_ops['++'],
+							model.todos,
+							{
+								ctor: '::',
+								_0: newTodo,
+								_1: {ctor: '[]'}
+							})
+					});
 			case 'DeleteTodo':
 				var _p1 = _p0._0;
 				var deletedTodo = A2(
@@ -8655,46 +8717,37 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						return _elm_lang$core$Native_Utils.eq(todo.id, _p1);
 					},
 					model.todos);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							todos: A2(
-								_elm_lang$core$List$filter,
-								function (todo) {
-									return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
-								},
-								model.todos),
-							lastDeletedTodo: deletedTodo
-						}),
-					{ctor: '[]'});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						todos: A2(
+							_elm_lang$core$List$filter,
+							function (todo) {
+								return !_elm_lang$core$Native_Utils.eq(todo.id, _p1);
+							},
+							model.todos),
+						lastDeletedTodo: deletedTodo
+					});
 			case 'UndoDelete':
 				var _p2 = model.lastDeletedTodo;
 				if (_p2.ctor === 'Nothing') {
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						model,
-						{ctor: '[]'});
+					return model;
 				} else {
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						_elm_lang$core$Native_Utils.update(
-							model,
-							{
-								todos: A2(
-									_elm_lang$core$Basics_ops['++'],
-									model.todos,
-									{
-										ctor: '::',
-										_0: _elm_lang$core$Native_Utils.update(
-											_p2._0,
-											{state: _user$project$InterfaceState$Viewing}),
-										_1: {ctor: '[]'}
-									}),
-								lastDeletedTodo: _elm_lang$core$Maybe$Nothing
-							}),
-						{ctor: '[]'});
+					return _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							todos: A2(
+								_elm_lang$core$Basics_ops['++'],
+								model.todos,
+								{
+									ctor: '::',
+									_0: _elm_lang$core$Native_Utils.update(
+										_p2._0,
+										{state: _user$project$InterfaceState$Viewing}),
+									_1: {ctor: '[]'}
+								}),
+							lastDeletedTodo: _elm_lang$core$Maybe$Nothing
+						});
 				}
 			case 'EditTodo':
 				var edit = function (todo) {
@@ -8702,64 +8755,102 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						todo,
 						{state: _user$project$InterfaceState$Editing}) : todo;
 				};
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							todos: A2(_elm_lang$core$List$map, edit, model.todos)
-						}),
-					{ctor: '[]'});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						todos: A2(_elm_lang$core$List$map, edit, model.todos)
+					});
 			case 'ViewTodo':
 				var view = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
 						todo,
 						{state: _user$project$InterfaceState$Viewing}) : todo;
 				};
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							todos: A2(_elm_lang$core$List$map, view, model.todos)
-						}),
-					{ctor: '[]'});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						todos: A2(_elm_lang$core$List$map, view, model.todos)
+					});
 			default:
 				var update = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
 						todo,
 						{title: _p0._1}) : todo;
 				};
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							todos: A2(_elm_lang$core$List$map, update, model.todos)
-						}),
-					{ctor: '[]'});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						todos: A2(_elm_lang$core$List$map, update, model.todos)
+					});
 		}
 	});
+var _user$project$Todo_Update$isUndoable = function (action) {
+	var _p3 = action;
+	switch (_p3.ctor) {
+		case 'NewTodo':
+			return true;
+		case 'DeleteTodo':
+			return true;
+		case 'UndoDelete':
+			return false;
+		case 'EditTodo':
+			return false;
+		case 'ViewTodo':
+			return false;
+		default:
+			return false;
+	}
+};
 
-var _user$project$Controllers$update = F2(
+var _user$project$Update$isUndoable = function (msg) {
+	var _p0 = msg;
+	switch (_p0.ctor) {
+		case 'Noop':
+			return false;
+		case 'TodoMsg':
+			return _user$project$Todo_Update$isUndoable(_p0._0);
+		default:
+			return false;
+	}
+};
+var _user$project$Update$update = F2(
 	function (msg, model) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
-			case 'Noop':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					{ctor: '[]'});
-			case 'TodoMsg':
-				return A2(_user$project$Todo_Update$handleTodoAction, _p0._0, model);
-			default:
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+		var newModel = function () {
+			var _p1 = msg;
+			switch (_p1.ctor) {
+				case 'Noop':
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
 						model,
-						{todoTitleInputState: _p0._0}),
-					{ctor: '[]'});
-		}
+						{ctor: '[]'});
+				case 'TodoMsg':
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						A2(_user$project$Todo_Update$handleTodoAction, _p1._0, model),
+						{ctor: '[]'});
+				default:
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{todoTitleInputState: _p1._0}),
+						{ctor: '[]'});
+			}
+		}();
+		var newMessages = _user$project$Update$isUndoable(msg) ? A2(
+			_elm_lang$core$Basics_ops['++'],
+			model.messages,
+			{
+				ctor: '::',
+				_0: msg,
+				_1: {ctor: '[]'}
+			}) : model.messages;
+		return A2(
+			_elm_lang$core$Platform_Cmd_ops['!'],
+			_elm_lang$core$Native_Utils.update(
+				model,
+				{messages: newMessages}),
+			{ctor: '[]'});
 	});
 
 var _user$project$App$init = A2(
@@ -8770,7 +8861,7 @@ var _user$project$App$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$App$init,
 		view: _user$project$Views$view,
-		update: _user$project$Controllers$update,
+		update: _user$project$Update$update,
 		subscriptions: function (_p0) {
 			return _elm_lang$core$Platform_Sub$none;
 		}

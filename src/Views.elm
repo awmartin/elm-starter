@@ -12,26 +12,45 @@ import Html.Attributes exposing (..)
 import Html.Events as Events
 
 
+
 -- The view method consumed by the "program" method in App.elm. This effectively draws the
 -- entire app.
 view : Model -> Html Msg
 view model =
-    layout <| div []
-        [ lazy viewInput model.todoTitleInputState
-        , lazy viewUndoMessage model
-        , lazy viewTodoList model.todos
-        ]
-
-
--- Wraps the given contents in the primary layout, leveraging Skeleton CSS.
-layout : Html Msg -> Html Msg
-layout contents =
     div [ class "container" ]
         [ div [ class "row" ]
             [ div [ class "three columns"] [ text nbsp ]
-            , div [ class "six columns"] [ contents ]
+            , div
+                [ class "six columns"]
+                [ lazy viewInput model.todoTitleInputState
+                , lazy viewUndoMessage model
+                , lazy viewTodoList model.todos
+                ]
+            , div [ class "three columns" ] [ viewMessageStream model.messages ]
             ]
         ]
+
+viewMessageStream : List Msg -> Html Msg
+viewMessageStream messages =
+    ul []
+        (List.map viewMessage messages)
+
+viewMessage : Msg -> Html Msg
+viewMessage message =
+    let content =
+        case message of
+            Noop -> text "Noop"
+            TodoMsg todoAction ->
+                case todoAction of
+                    NewTodo -> text "NewTodo"
+                    DeleteTodo id -> text ("DeleteTodo" ++ toString id)
+                    UndoDelete -> text ("UndoDelete")
+                    EditTodo id -> text ("EditTodo" ++ toString id)
+                    ViewTodo id -> text ("ViewTodo" ++ toString id)
+                    UpdateTodoTitle id newTitle -> text ("UpdateTodoTitle" ++ toString id ++ newTitle)
+            UpdateInput newTitle -> text "UpdateInput"
+    in
+        li [] [content]
 
 -- Draw the text input field.
 viewInput : String -> Html Msg
@@ -46,8 +65,6 @@ viewInput fieldText =
         , onEnter (TodoMsg NewTodo)
         ]
         []
-
-
 
 -- Display a message enabling the user to undo a delete.
 viewUndoMessage : Model -> Html Msg

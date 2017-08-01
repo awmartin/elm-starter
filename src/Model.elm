@@ -1,7 +1,10 @@
 module Model exposing (..)
 
-import Todo.Model exposing (Todo)
+import Msg exposing (Msg)
 import InterfaceState exposing (InterfaceState)
+
+import Todo.Model exposing (Todo)
+
 
 -- The application state.
 type alias Model =
@@ -9,6 +12,7 @@ type alias Model =
     , todoTitleInputState : String
     , nextId : Int
     , lastDeletedTodo : Maybe Todo
+    , messages : List Msg
     }
 
 
@@ -19,4 +23,5 @@ emptyModel =
     , todoTitleInputState = ""
     , nextId = 1
     , lastDeletedTodo = Nothing
+    , messages = []
     }

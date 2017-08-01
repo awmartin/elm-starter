@@ -1,6 +1,5 @@
 module Todo.Update exposing (..)
 
-import Msg exposing (Msg)
 import Model exposing (Model)
 import InterfaceState exposing (InterfaceState(..))
 import Util exposing (..)
@@ -8,8 +7,17 @@ import Util exposing (..)
 import Todo.Model exposing (Todo, constructTodo)
 import Todo.Msg exposing (TodoAction(..))
 
+isUndoable : TodoAction -> Bool
+isUndoable action =
+    case action of
+        NewTodo -> True
+        DeleteTodo id -> True
+        UndoDelete -> False
+        EditTodo id -> False
+        ViewTodo id -> False
+        UpdateTodoTitle id newTitle -> False
 
-handleTodoAction : TodoAction -> Model -> (Model, Cmd Msg)
+handleTodoAction : TodoAction -> Model -> Model
 handleTodoAction msg model =
     case msg of
         NewTodo ->
@@ -20,8 +28,7 @@ handleTodoAction msg model =
                     | nextId = model.nextId + 1
                     , todoTitleInputState = ""
                     , todos = model.todos ++ [ newTodo ]
-                } ! []
-
+                }
 
         DeleteTodo id ->
             let
@@ -30,18 +37,18 @@ handleTodoAction msg model =
                 { model
                     | todos = List.filter (\todo -> todo.id /= id) model.todos
                     , lastDeletedTodo = deletedTodo
-                } ! []
+                }
 
         UndoDelete ->
             case model.lastDeletedTodo of
                 Nothing ->
-                    model ! []
+                    model
                 Just todoToRestore ->
                     -- Update the interface state as well so we don't undelete in the Editing state.
                     { model
                         | todos = model.todos ++ [ { todoToRestore | state = Viewing } ]
                         , lastDeletedTodo = Nothing
-                    } ! []
+                    }
 
         EditTodo id ->
             let
@@ -52,7 +59,7 @@ handleTodoAction msg model =
                     else
                         todo
             in
-                { model | todos = List.map edit model.todos } ! []
+                { model | todos = List.map edit model.todos }
 
         ViewTodo id ->
             let
@@ -63,7 +70,7 @@ handleTodoAction msg model =
                     else
                         todo
             in
-                { model | todos = List.map view model.todos } ! []
+                { model | todos = List.map view model.todos }
 
         UpdateTodoTitle id newTitle ->
             let
@@ -74,4 +81,4 @@ handleTodoAction msg model =
                     else
                         todo
             in
-                { model | todos = List.map update model.todos } ! []
+                { model | todos = List.map update model.todos }
