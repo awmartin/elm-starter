@@ -6,7 +6,7 @@
   <title>Elm | Starter</title>
 
 
-  <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
   <script type="text/javascript" src="scripts/app.js"></script>
   <script type="text/javascript" src="scripts/config.js"></script>
 
@@ -119,6 +119,8 @@
         var node = document.getElementById('app');
         var app = Elm.App.embed(node);
 
+        // ports found in Todo.View.Update
+        
         app.ports.onNewTodo.subscribe(function(todo) {
             delete todo.id;
             var ref = firebase.database().ref('todos');

@@ -8584,7 +8584,7 @@ var _user$project$Views$layout = function (contents) {
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('three columns'),
+							_0: _elm_lang$html$Html_Attributes$class('two columns'),
 							_1: {ctor: '[]'}
 						},
 						{
@@ -8598,7 +8598,7 @@ var _user$project$Views$layout = function (contents) {
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('six columns'),
+								_0: _elm_lang$html$Html_Attributes$class('eight columns'),
 								_1: {ctor: '[]'}
 							},
 							{

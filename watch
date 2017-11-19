@@ -1,3 +1,0 @@
-#!/bin/sh
-
-fswatch -o ./src/ | while read; do ./build; done

@@ -7,8 +7,8 @@ import Todo.View exposing (..)
 import Util exposing (..)
 
 import Html exposing (..)
-import Html.Lazy exposing (lazy, lazy2)
-import Html.Attributes exposing (..)
+import Html.Lazy as Lazy exposing (lazy, lazy2)
+import Html.Attributes as Attr exposing (..)
 import Html.Events as Events
 
 
@@ -17,19 +17,19 @@ import Html.Events as Events
 view : Model -> Html Msg
 view model =
     layout <| div []
-        [ lazy viewInput model.todoTitleInputState
-        , lazy viewUndoMessage model
-        , lazy viewTodoList model.todos
+        [ Lazy.lazy viewInput model.todoTitleInputState
+        , Lazy.lazy viewUndoMessage model
+        , Lazy.lazy viewTodoList model.todos
         ]
 
 
 -- Wraps the given contents in the primary layout, leveraging Skeleton CSS.
 layout : Html Msg -> Html Msg
 layout contents =
-    div [ class "container" ]
-        [ div [ class "row" ]
-            [ div [ class "three columns"] [ text nbsp ]
-            , div [ class "six columns"] [ contents ]
+    div [ Attr.class "container" ]
+        [ div [ Attr.class "row" ]
+            [ div [ Attr.class "two columns"] [ text nbsp ]
+            , div [ Attr.class "eight columns"] [ contents ]
             ]
         ]
 
@@ -37,11 +37,11 @@ layout contents =
 viewInput : String -> Html Msg
 viewInput fieldText =
     input
-        [ class "new-todo u-full-width input"
-        , placeholder "Enter an item here + press return."
-        , autofocus True
-        , value fieldText
-        , name "newTodo"
+        [ Attr.class "new-todo u-full-width input"
+        , Attr.placeholder "Enter an item here + press return."
+        , Attr.autofocus True
+        , Attr.value fieldText
+        , Attr.name "newTodo"
         , Events.onInput UpdateInput
         , onEnter (TodoMsg NewTodo)
         ]
@@ -57,11 +57,11 @@ viewUndoMessage model =
             div [] []
 
         Just todo ->
-            div [ class "undo-message" ]
+            div [ Attr.class "undo-message" ]
                 [ text "Todo deleted."
                 , text nbsp
                 , a
-                    [ class "link"
+                    [ Attr.class "link"
                     , Events.onClick (TodoMsg UndoDelete)
                     ]
                     [ text "Undo?" ]
