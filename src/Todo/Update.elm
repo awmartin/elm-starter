@@ -19,13 +19,13 @@ handleTodoAction msg model =
     case msg of
         NewTodo ->
             let newTodo =
-                constructTodo "" model.todoTitleInputState
+                constructTodo "" model.todoTitleInputState False
             in
                 -- Just update the model's UI state. Let Firebase take care of the data.
                 ({ model
                     | todoTitleInputState = ""
                 },
-                onNewTodo { id = "", title = newTodo.title })
+                onNewTodo { id = "", title = newTodo.title, done = newTodo.done })
 
         DeleteTodo id ->
             let
@@ -41,8 +41,9 @@ handleTodoAction msg model =
                     model ! []
                 Just todoToRestore ->
                     ({ model | lastDeletedTodo = Nothing }
-                    , onNewTodo {id = "", title = todoToRestore.title})
+                    , onNewTodo {id = "", title = todoToRestore.title, done = todoToRestore.done})
 
+        -- Switches the UI to editing mode.
         EditTodo id ->
             let
                 edit : Todo -> Todo
@@ -68,10 +69,11 @@ handleTodoAction msg model =
                     Nothing ->
                         model ! []
                     Just todo ->
-                        -- TODO Ensure the interface state is set to view, if the title hasn't
-                        -- changed.
+                        -- TODO Ensure the interface state is set to view, if the title hasn't changed.
+                        -- This is where we update Firebase, once the user has decided
+                        -- what the actual title value should be.
                         ( { model | todos = List.map view model.todos }
-                          , onUpdateTodo (TodoFirebase id todo.title) )
+                        , onUpdateTodo (TodoFirebase id todo.title todo.done) )
 
         UpdateTodoTitle id newTitle ->
             let
@@ -82,6 +84,23 @@ handleTodoAction msg model =
                     else
                         todo
             in
-                -- Don't update Firebase.
+                -- Don't update Firebase, because we're just typing.
                 { model | todos = List.map update model.todos } ! []
 
+        ToggleDone id ->
+            let
+                update : Todo -> Todo
+                update todo =
+                    if todo.id == id then
+                        { todo | done = not todo.done }
+                    else
+                        todo
+                newTodos = List.map update model.todos
+                todo = pluck (\todo -> todo.id == id) newTodos
+            in
+                  case todo of
+                      Nothing ->
+                          model ! []
+                      Just todo ->
+                          ( { model | todos = List.map update model.todos }
+                          , onUpdateTodo (TodoFirebase id todo.title todo.done) )

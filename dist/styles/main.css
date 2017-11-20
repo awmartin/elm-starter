@@ -14,3 +14,9 @@
 .todo-title:hover {
     background-color: #ffe;
 }
+.todo-done {
+    text-decoration: line-through;
+}
+li {
+  list-style-type: none;
+}

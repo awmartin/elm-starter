@@ -8268,6 +8268,9 @@ var _elm_lang$html$Html_Lazy$lazy3 = _elm_lang$virtual_dom$VirtualDom$lazy3;
 var _elm_lang$html$Html_Lazy$lazy2 = _elm_lang$virtual_dom$VirtualDom$lazy2;
 var _elm_lang$html$Html_Lazy$lazy = _elm_lang$virtual_dom$VirtualDom$lazy;
 
+var _user$project$Todo_Msg$ToggleDone = function (a) {
+	return {ctor: 'ToggleDone', _0: a};
+};
 var _user$project$Todo_Msg$UpdateTodoTitle = F2(
 	function (a, b) {
 		return {ctor: 'UpdateTodoTitle', _0: a, _1: b};
@@ -8284,9 +8287,9 @@ var _user$project$Todo_Msg$DeleteTodo = function (a) {
 };
 var _user$project$Todo_Msg$NewTodo = {ctor: 'NewTodo'};
 
-var _user$project$Todo_Firebase$TodoFirebase = F2(
-	function (a, b) {
-		return {id: a, title: b};
+var _user$project$Todo_Firebase$TodoFirebase = F3(
+	function (a, b, c) {
+		return {id: a, title: b, done: c};
 	});
 
 var _user$project$Msg$FirebaseUpdate = function (a) {
@@ -8303,13 +8306,13 @@ var _user$project$Msg$Noop = {ctor: 'Noop'};
 var _user$project$Todo_InterfaceState$Editing = {ctor: 'Editing'};
 var _user$project$Todo_InterfaceState$Viewing = {ctor: 'Viewing'};
 
-var _user$project$Todo_Model$constructTodo = F2(
-	function (id, title) {
-		return {id: id, title: title, state: _user$project$Todo_InterfaceState$Viewing};
+var _user$project$Todo_Model$constructTodo = F3(
+	function (id, title, done) {
+		return {id: id, title: title, state: _user$project$Todo_InterfaceState$Viewing, done: done};
 	});
-var _user$project$Todo_Model$Todo = F3(
-	function (a, b, c) {
-		return {id: a, title: b, state: c};
+var _user$project$Todo_Model$Todo = F4(
+	function (a, b, c, d) {
+		return {id: a, title: b, state: c, done: d};
 	});
 
 var _user$project$Model$emptyModel = {
@@ -8372,6 +8375,26 @@ var _user$project$Todo_View$deleteLink = function (todo) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Todo_View$checkmark = function (todo) {
+	return A2(
+		_elm_lang$html$Html$a,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Events$onClick(
+				_user$project$Msg$TodoMsg(
+					_user$project$Todo_Msg$ToggleDone(todo.id))),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('link'),
+				_1: {ctor: '[]'}
+			}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text('✔'),
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Todo_View$viewTodoTitleInput = function (todo) {
 	var handler = function (newTitle) {
 		return _user$project$Msg$TodoMsg(
@@ -8415,6 +8438,7 @@ var _user$project$Todo_View$viewTodoTitleInput = function (todo) {
 var _user$project$Todo_View$viewTodoTitle = function (todo) {
 	var _p0 = todo.state;
 	if (_p0.ctor === 'Viewing') {
+		var todoClass = todo.done ? 'todo-title todo-done' : 'todo-title';
 		return A2(
 			_elm_lang$html$Html$span,
 			{
@@ -8424,7 +8448,7 @@ var _user$project$Todo_View$viewTodoTitle = function (todo) {
 						_user$project$Todo_Msg$EditTodo(todo.id))),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('todo-title'),
+					_0: _elm_lang$html$Html_Attributes$class(todoClass),
 					_1: {ctor: '[]'}
 				}
 			},
@@ -8447,14 +8471,22 @@ var _user$project$Todo_View$viewTodo = function (todo) {
 		},
 		{
 			ctor: '::',
-			_0: _user$project$Todo_View$viewTodoTitle(todo),
+			_0: _user$project$Todo_View$checkmark(todo),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$html$Html$text(_user$project$Util$nbsp),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Todo_View$deleteLink(todo),
-					_1: {ctor: '[]'}
+					_0: _user$project$Todo_View$viewTodoTitle(todo),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_user$project$Util$nbsp),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Todo_View$deleteLink(todo),
+							_1: {ctor: '[]'}
+						}
+					}
 				}
 			}
 		});
@@ -8635,12 +8667,12 @@ var _user$project$Views$view = function (model) {
 var _user$project$Todo_Update$onNewTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onNewTodo',
 	function (v) {
-		return {id: v.id, title: v.title};
+		return {id: v.id, title: v.title, done: v.done};
 	});
 var _user$project$Todo_Update$onUpdateTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onUpdateTodo',
 	function (v) {
-		return {id: v.id, title: v.title};
+		return {id: v.id, title: v.title, done: v.done};
 	});
 var _user$project$Todo_Update$onDeleteTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onDeleteTodo',
@@ -8652,14 +8684,14 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 		var _p0 = msg;
 		switch (_p0.ctor) {
 			case 'NewTodo':
-				var newTodo = A2(_user$project$Todo_Model$constructTodo, '', model.todoTitleInputState);
+				var newTodo = A3(_user$project$Todo_Model$constructTodo, '', model.todoTitleInputState, false);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{todoTitleInputState: ''}),
 					_1: _user$project$Todo_Update$onNewTodo(
-						{id: '', title: newTodo.title})
+						{id: '', title: newTodo.title, done: newTodo.done})
 				};
 			case 'DeleteTodo':
 				var _p1 = _p0._0;
@@ -8684,13 +8716,14 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						model,
 						{ctor: '[]'});
 				} else {
+					var _p3 = _p2._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{lastDeletedTodo: _elm_lang$core$Maybe$Nothing}),
 						_1: _user$project$Todo_Update$onNewTodo(
-							{id: '', title: _p2._0.title})
+							{id: '', title: _p3.title, done: _p3.done})
 					};
 				}
 			case 'EditTodo':
@@ -8708,25 +8741,26 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 						}),
 					{ctor: '[]'});
 			case 'ViewTodo':
-				var _p4 = _p0._0;
+				var _p6 = _p0._0;
 				var view = function (todo) {
-					return _elm_lang$core$Native_Utils.eq(todo.id, _p4) ? _elm_lang$core$Native_Utils.update(
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p6) ? _elm_lang$core$Native_Utils.update(
 						todo,
 						{state: _user$project$Todo_InterfaceState$Viewing}) : todo;
 				};
 				var todo = A2(
 					_user$project$Util$pluck,
 					function (todo) {
-						return _elm_lang$core$Native_Utils.eq(todo.id, _p4);
+						return _elm_lang$core$Native_Utils.eq(todo.id, _p6);
 					},
 					model.todos);
-				var _p3 = todo;
-				if (_p3.ctor === 'Nothing') {
+				var _p4 = todo;
+				if (_p4.ctor === 'Nothing') {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						model,
 						{ctor: '[]'});
 				} else {
+					var _p5 = _p4._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -8735,10 +8769,10 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 								todos: A2(_elm_lang$core$List$map, view, model.todos)
 							}),
 						_1: _user$project$Todo_Update$onUpdateTodo(
-							A2(_user$project$Todo_Firebase$TodoFirebase, _p4, _p3._0.title))
+							A3(_user$project$Todo_Firebase$TodoFirebase, _p6, _p5.title, _p5.done))
 					};
 				}
-			default:
+			case 'UpdateTodoTitle':
 				var update = function (todo) {
 					return _elm_lang$core$Native_Utils.eq(todo.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
 						todo,
@@ -8752,6 +8786,39 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 							todos: A2(_elm_lang$core$List$map, update, model.todos)
 						}),
 					{ctor: '[]'});
+			default:
+				var _p9 = _p0._0;
+				var update = function (todo) {
+					return _elm_lang$core$Native_Utils.eq(todo.id, _p9) ? _elm_lang$core$Native_Utils.update(
+						todo,
+						{done: !todo.done}) : todo;
+				};
+				var newTodos = A2(_elm_lang$core$List$map, update, model.todos);
+				var todo = A2(
+					_user$project$Util$pluck,
+					function (todo) {
+						return _elm_lang$core$Native_Utils.eq(todo.id, _p9);
+					},
+					newTodos);
+				var _p7 = todo;
+				if (_p7.ctor === 'Nothing') {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						{ctor: '[]'});
+				} else {
+					var _p8 = _p7._0;
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								todos: A2(_elm_lang$core$List$map, update, model.todos)
+							}),
+						_1: _user$project$Todo_Update$onUpdateTodo(
+							A3(_user$project$Todo_Firebase$TodoFirebase, _p9, _p8.title, _p8.done))
+					};
+				}
 		}
 	});
 
@@ -8775,7 +8842,7 @@ var _user$project$Update$update = F2(
 					{ctor: '[]'});
 			default:
 				var makeTodo = function (fodo) {
-					return A2(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title);
+					return A3(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title, fodo.done);
 				};
 				var todoList = A2(_elm_lang$core$List$map, makeTodo, _p0._0);
 				return A2(
@@ -8800,8 +8867,13 @@ var _user$project$App$todos = _elm_lang$core$Native_Platform.incomingPort(
 				return A2(
 					_elm_lang$core$Json_Decode$andThen,
 					function (title) {
-						return _elm_lang$core$Json_Decode$succeed(
-							{id: id, title: title});
+						return A2(
+							_elm_lang$core$Json_Decode$andThen,
+							function (done) {
+								return _elm_lang$core$Json_Decode$succeed(
+									{id: id, title: title, done: done});
+							},
+							A2(_elm_lang$core$Json_Decode$field, 'done', _elm_lang$core$Json_Decode$bool));
 					},
 					A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
 			},

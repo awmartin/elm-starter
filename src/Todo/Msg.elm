@@ -7,3 +7,4 @@ type TodoAction =
     | EditTodo String
     | ViewTodo String
     | UpdateTodoTitle String String
+    | ToggleDone String

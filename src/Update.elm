@@ -24,9 +24,8 @@ update msg model =
         FirebaseUpdate list ->
             let makeTodo : TodoFirebase -> Todo
                 makeTodo fodo =
-                    constructTodo fodo.id fodo.title
+                    constructTodo fodo.id fodo.title fodo.done
                 todoList =
                     List.map makeTodo list
             in
                 { model | todos = todoList } ! []
-
