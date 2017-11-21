@@ -9,7 +9,7 @@ import Todo.Msg exposing (TodoAction(..))
 import Todo.InterfaceState exposing (InterfaceState(..))
 import Todo.Firebase exposing (TodoFirebase)
 
-
+-- Create ports that push events to an external receiver.
 port onNewTodo : TodoFirebase -> Cmd msg
 port onUpdateTodo : TodoFirebase -> Cmd msg
 port onDeleteTodo : String -> Cmd msg

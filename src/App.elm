@@ -25,10 +25,11 @@ init : ( Model, Cmd Msg )
 init =
     Model.emptyModel ! []
 
+-- Creates a port that is intended to act as a subscription to an external event.
 port todos : (List TodoFirebase -> msg) -> Sub msg
 
+-- This returns a subscription handler to the Html.program method above.
 subscriptions : Model -> Sub Msg
 subscriptions model =
     -- Can do some if-statement magic here if necessary.
     todos Msg.FirebaseUpdate
-
