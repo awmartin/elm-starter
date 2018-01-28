@@ -6,7 +6,8 @@
   <title>Elm | Starter</title>
 
 
-  <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-firestore.js"></script>
   <script type="text/javascript" src="scripts/app.js"></script>
   <script type="text/javascript" src="scripts/config.js"></script>
 
@@ -31,6 +32,8 @@
     <div id="app"></div>
 
   <script>
+    var state = {projectSubscription:null};
+
     // Initialize Firebase
     firebase.initializeApp(config());
 
@@ -98,7 +101,7 @@
           document.getElementById('quickstart-sign-in').textContent = 'Sign out';
           // document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
 
-          initializeElmApp();
+          initializeElmApp(user);
         } else {
           // User is signed out.
           // document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
@@ -115,42 +118,83 @@
       document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
     }
 
-    function initializeElmApp() {
+    function subscribeToProjectTodos(app, db, user, project){
+        // Unsubscribe.
+        if (state.projectSubscription) { state.projectSubscription(); }
+
+        var projectRef = null,
+            projectData = null;
+        if (project.ref) {
+            projectRef = project.ref;
+            projectData = project.data();
+            projectData.id = project.id;
+        } else {
+            projectRef = db.collection('accounts').doc(user.uid).collection('projects').doc(project.id);
+            projectData = project;
+        }
+
+        var projectTodos = db.collection('accounts')
+            .doc(user.uid)
+            .collection('todos')
+            .where('project', '==', projectRef);
+
+        state.projectSubscription = projectTodos.onSnapshot(function(snapshot){
+            var list = [];
+            snapshot.forEach(function(doc){
+                var todo = doc.data();
+                todo.id = doc.id;
+                todo.project = projectData;
+                list.push(todo);
+            });
+            app.ports.events.send({todos:list, projects:null});
+        });
+    }
+
+    function initializeElmApp(user) {
         var node = document.getElementById('app');
         var app = Elm.App.embed(node);
+        var db = firebase.firestore();
+        var projects = db.collection('accounts').doc(user.uid).collection('projects');
 
+        // Load all the Projects into the app.
+        projects.onSnapshot(function(snapshot){
+            var list = [];
+            snapshot.forEach(function(doc){
+                var project = doc.data();
+                project.id = doc.id;
+                list.push(project);
+            });
+            app.ports.events.send({todos: null, projects:list});
+        });
+
+        app.ports.onProjectSelect.subscribe(function(project){
+            subscribeToProjectTodos(app, db, user, project);
+        });
+
+        // Provide mechanisms for todo CRUD.
         // ports found in Todo.View.Update
+        var todos = db.collection('accounts')
+            .doc(user.uid)
+            .collection('todos');
         
         app.ports.onNewTodo.subscribe(function(todo) {
             delete todo.id;
-            var ref = firebase.database().ref('todos');
-            ref.push(todo);
+            var projectRef = db.collection('accounts').doc(user.uid).collection('projects').doc(todo.project.id);
+            todo.project = projectRef;
+            todos.add(todo);
         });
 
         app.ports.onUpdateTodo.subscribe(function(todo) {
-            var path = 'todos/' + todo.id;
+            var ref = todos.doc(todo.id);
             delete todo.id;
-            var ref = firebase.database().ref(path);
+            var projectRef = db.collection('accounts').doc(user.uid).collection('projects').doc(todo.project.id);
+            todo.project = projectRef;
             ref.update(todo);
         });
 
         app.ports.onDeleteTodo.subscribe(function(key) {
-            var path = 'todos/' + key;
-            var ref = firebase.database().ref(path);
-            ref.remove();
-        });
-
-        firebase.database().ref('todos').on('value', function(snapshot){
-            var val = snapshot.val();
-            var list = [];
-            for (var key in val) {
-                if (val.hasOwnProperty(key)) {
-                    var todo = val[key];
-                    todo.id = key;
-                    list.push(todo);
-                }
-            }
-            app.ports.todos.send(list);
+            var ref = todos.doc(key);
+            ref.delete();
         });
     }
 

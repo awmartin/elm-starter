@@ -2,10 +2,11 @@ port module App exposing (..)
 
 import Views
 import Msg exposing (Msg)
-import Model exposing (Model, emptyModel)
+import Model exposing (Model, emptyModel, FirebaseData)
 import Update exposing (update)
 
 import Todo.Firebase exposing (TodoFirebase)
+-- import Project.Firebase exposing (ProjectFirebase)
 
 import Html exposing (..)
 
@@ -26,10 +27,11 @@ init =
     Model.emptyModel ! []
 
 -- Creates a port that is intended to act as a subscription to an external event.
-port todos : (List TodoFirebase -> msg) -> Sub msg
+port events : (FirebaseData -> msg) -> Sub msg
 
 -- This returns a subscription handler to the Html.program method above.
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    -- Can do some if-statement magic here if necessary.
-    todos Msg.FirebaseUpdate
+    -- Can do some if-statement magic here if necessary. But this doesn't make any sense because
+    -- it doesn't depend on the incoming data, but the data you already have in 'model'.
+    events Msg.FirebaseUpdate

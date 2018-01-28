@@ -20,3 +20,6 @@
 li {
   list-style-type: none;
 }
+li.project.selected {
+    background-color: yellow;
+}

@@ -4,6 +4,8 @@ import Msg exposing (Msg(..))
 import Todo.Msg exposing (TodoAction(..))
 import Model exposing (Model)
 import Todo.View exposing (..)
+import Project.View exposing (..)
+
 import Util exposing (..)
 
 import Html exposing (..)
@@ -16,22 +18,18 @@ import Html.Events as Events
 -- entire app.
 view : Model -> Html Msg
 view model =
-    layout <| div []
-        [ Lazy.lazy viewInput model.todoTitleInputState
-        , Lazy.lazy viewUndoMessage model
-        , Lazy.lazy viewTodoList model.todos
-        ]
-
-
--- Wraps the given contents in the primary layout, leveraging Skeleton CSS.
-layout : Html Msg -> Html Msg
-layout contents =
     div [ Attr.class "container" ]
         [ div [ Attr.class "row" ]
-            [ div [ Attr.class "two columns"] [ text nbsp ]
-            , div [ Attr.class "eight columns"] [ contents ]
+            [ div [ Attr.class "two columns"] 
+                [ Lazy.lazy2 viewProjectList model.projects model.currentProject ]
+            , div [ Attr.class "eight columns"]
+                [ Lazy.lazy viewInput model.todoTitleInputState
+                , Lazy.lazy viewUndoMessage model
+                , Lazy.lazy viewTodoList model.todos
+                ]
             ]
         ]
+
 
 -- Draw the text input field.
 viewInput : String -> Html Msg

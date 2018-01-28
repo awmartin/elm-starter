@@ -19,21 +19,17 @@ handleTodoAction msg model =
     case msg of
         NewTodo ->
             let newTodo =
-                constructTodo "" model.todoTitleInputState False
+                constructTodo "" model.todoTitleInputState False model.currentProject
             in
                 -- Just update the model's UI state. Let Firebase take care of the data.
-                ({ model
-                    | todoTitleInputState = ""
-                },
-                onNewTodo { id = "", title = newTodo.title, done = newTodo.done })
+                ({ model | todoTitleInputState = "" },
+                onNewTodo { id = "", title = newTodo.title, done = newTodo.done, project = model.currentProject })
 
         DeleteTodo id ->
             let
                 deletedTodo = pluck (\todo -> todo.id == id) model.todos
             in
-                ({ model
-                    | lastDeletedTodo = deletedTodo
-                }, onDeleteTodo id)
+                ({ model | lastDeletedTodo = deletedTodo}, onDeleteTodo id)
 
         UndoDelete ->
             case model.lastDeletedTodo of
@@ -41,7 +37,7 @@ handleTodoAction msg model =
                     model ! []
                 Just todoToRestore ->
                     ({ model | lastDeletedTodo = Nothing }
-                    , onNewTodo {id = "", title = todoToRestore.title, done = todoToRestore.done})
+                    , onNewTodo {id = "", title = todoToRestore.title, done = todoToRestore.done, project = todoToRestore.project })
 
         -- Switches the UI to editing mode.
         EditTodo id ->
@@ -73,7 +69,8 @@ handleTodoAction msg model =
                         -- This is where we update Firebase, once the user has decided
                         -- what the actual title value should be.
                         ( { model | todos = List.map view model.todos }
-                        , onUpdateTodo (TodoFirebase id todo.title todo.done) )
+                        , onUpdateTodo (TodoFirebase id todo.title todo.done todo.project)
+                        )
 
         UpdateTodoTitle id newTitle ->
             let
@@ -103,4 +100,4 @@ handleTodoAction msg model =
                           model ! []
                       Just todo ->
                           ( { model | todos = List.map update model.todos }
-                          , onUpdateTodo (TodoFirebase id todo.title todo.done) )
+                          , onUpdateTodo (TodoFirebase id todo.title todo.done todo.project) )

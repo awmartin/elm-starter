@@ -1,13 +1,14 @@
 module Msg exposing (..)
 
 import Todo.Msg exposing (..)
-import Todo.Firebase exposing (TodoFirebase)
-
+import Model exposing (FirebaseData)
+import Project.Model exposing (Project)
 
 -- The application's "messages" that initiate state changes.
 type Msg =
     Noop
     | UpdateInput String
     | TodoMsg TodoAction
-    | FirebaseUpdate (List TodoFirebase)
+    | FirebaseUpdate FirebaseData
+    | SelectProject Project
 

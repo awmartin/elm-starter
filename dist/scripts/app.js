@@ -8287,11 +8287,57 @@ var _user$project$Todo_Msg$DeleteTodo = function (a) {
 };
 var _user$project$Todo_Msg$NewTodo = {ctor: 'NewTodo'};
 
-var _user$project$Todo_Firebase$TodoFirebase = F3(
-	function (a, b, c) {
-		return {id: a, title: b, done: c};
+var _user$project$Todo_InterfaceState$Editing = {ctor: 'Editing'};
+var _user$project$Todo_InterfaceState$Viewing = {ctor: 'Viewing'};
+
+var _user$project$Project_Model$constructProject = F2(
+	function (id, title) {
+		return {id: id, title: title};
+	});
+var _user$project$Project_Model$Project = F2(
+	function (a, b) {
+		return {id: a, title: b};
 	});
 
+var _user$project$Todo_Model$constructTodo = F4(
+	function (id, title, done, project) {
+		return {id: id, title: title, state: _user$project$Todo_InterfaceState$Viewing, done: done, project: project};
+	});
+var _user$project$Todo_Model$Todo = F5(
+	function (a, b, c, d, e) {
+		return {id: a, title: b, state: c, done: d, project: e};
+	});
+
+var _user$project$Todo_Firebase$TodoFirebase = F4(
+	function (a, b, c, d) {
+		return {id: a, title: b, done: c, project: d};
+	});
+
+var _user$project$Project_Firebase$ProjectFirebase = F2(
+	function (a, b) {
+		return {id: a, title: b};
+	});
+
+var _user$project$Model$emptyModel = {
+	todos: {ctor: '[]'},
+	projects: {ctor: '[]'},
+	todoTitleInputState: '',
+	nextId: 1,
+	lastDeletedTodo: _elm_lang$core$Maybe$Nothing,
+	currentProject: A2(_user$project$Project_Model$constructProject, '', 'Untitled')
+};
+var _user$project$Model$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {todos: a, projects: b, todoTitleInputState: c, nextId: d, lastDeletedTodo: e, currentProject: f};
+	});
+var _user$project$Model$FirebaseData = F2(
+	function (a, b) {
+		return {todos: a, projects: b};
+	});
+
+var _user$project$Msg$SelectProject = function (a) {
+	return {ctor: 'SelectProject', _0: a};
+};
 var _user$project$Msg$FirebaseUpdate = function (a) {
 	return {ctor: 'FirebaseUpdate', _0: a};
 };
@@ -8302,29 +8348,6 @@ var _user$project$Msg$UpdateInput = function (a) {
 	return {ctor: 'UpdateInput', _0: a};
 };
 var _user$project$Msg$Noop = {ctor: 'Noop'};
-
-var _user$project$Todo_InterfaceState$Editing = {ctor: 'Editing'};
-var _user$project$Todo_InterfaceState$Viewing = {ctor: 'Viewing'};
-
-var _user$project$Todo_Model$constructTodo = F3(
-	function (id, title, done) {
-		return {id: id, title: title, state: _user$project$Todo_InterfaceState$Viewing, done: done};
-	});
-var _user$project$Todo_Model$Todo = F4(
-	function (a, b, c, d) {
-		return {id: a, title: b, state: c, done: d};
-	});
-
-var _user$project$Model$emptyModel = {
-	todos: {ctor: '[]'},
-	todoTitleInputState: '',
-	nextId: 1,
-	lastDeletedTodo: _elm_lang$core$Maybe$Nothing
-};
-var _user$project$Model$Model = F4(
-	function (a, b, c, d) {
-		return {todos: a, todoTitleInputState: b, nextId: c, lastDeletedTodo: d};
-	});
 
 var _user$project$Util$pluck = F2(
 	function (f, items) {
@@ -8512,6 +8535,64 @@ var _user$project$Todo_View$viewTodoList = function (todoList) {
 		});
 };
 
+var _user$project$Project_View$viewProject = F2(
+	function (currentProject, project) {
+		var klass = _elm_lang$core$Native_Utils.eq(currentProject.id, project.id) ? 'project selected' : 'project';
+		return A2(
+			_elm_lang$html$Html$li,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class(klass),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$a,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Msg$SelectProject(project)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('link'),
+							_1: {ctor: '[]'}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(project.title),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$Project_View$viewKeyedProject = F2(
+	function (currentProject, project) {
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Basics$toString(project.id),
+			_1: A3(_elm_lang$html$Html_Lazy$lazy2, _user$project$Project_View$viewProject, currentProject, project)
+		};
+	});
+var _user$project$Project_View$viewProjectList = F2(
+	function (projects, currentProject) {
+		return A2(
+			_elm_lang$html$Html$section,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html_Keyed$ul,
+					{ctor: '[]'},
+					A2(
+						_elm_lang$core$List$map,
+						_user$project$Project_View$viewKeyedProject(currentProject),
+						projects)),
+				_1: {ctor: '[]'}
+			});
+	});
+
 var _user$project$Views$viewUndoMessage = function (model) {
 	var _p0 = model.lastDeletedTodo;
 	if (_p0.ctor === 'Nothing') {
@@ -8593,7 +8674,7 @@ var _user$project$Views$viewInput = function (fieldText) {
 		},
 		{ctor: '[]'});
 };
-var _user$project$Views$layout = function (contents) {
+var _user$project$Views$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -8621,7 +8702,7 @@ var _user$project$Views$layout = function (contents) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_user$project$Util$nbsp),
+							_0: A3(_elm_lang$html$Html_Lazy$lazy2, _user$project$Project_View$viewProjectList, model.projects, model.currentProject),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -8635,8 +8716,16 @@ var _user$project$Views$layout = function (contents) {
 							},
 							{
 								ctor: '::',
-								_0: contents,
-								_1: {ctor: '[]'}
+								_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewInput, model.todoTitleInputState),
+								_1: {
+									ctor: '::',
+									_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewUndoMessage, model),
+									_1: {
+										ctor: '::',
+										_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Todo_View$viewTodoList, model.todos),
+										_1: {ctor: '[]'}
+									}
+								}
 							}),
 						_1: {ctor: '[]'}
 					}
@@ -8644,35 +8733,26 @@ var _user$project$Views$layout = function (contents) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Views$view = function (model) {
-	return _user$project$Views$layout(
-		A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			{
-				ctor: '::',
-				_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewInput, model.todoTitleInputState),
-				_1: {
-					ctor: '::',
-					_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Views$viewUndoMessage, model),
-					_1: {
-						ctor: '::',
-						_0: A2(_elm_lang$html$Html_Lazy$lazy, _user$project$Todo_View$viewTodoList, model.todos),
-						_1: {ctor: '[]'}
-					}
-				}
-			}));
-};
 
 var _user$project$Todo_Update$onNewTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onNewTodo',
 	function (v) {
-		return {id: v.id, title: v.title, done: v.done};
+		return {
+			id: v.id,
+			title: v.title,
+			done: v.done,
+			project: {id: v.project.id, title: v.project.title}
+		};
 	});
 var _user$project$Todo_Update$onUpdateTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onUpdateTodo',
 	function (v) {
-		return {id: v.id, title: v.title, done: v.done};
+		return {
+			id: v.id,
+			title: v.title,
+			done: v.done,
+			project: {id: v.project.id, title: v.project.title}
+		};
 	});
 var _user$project$Todo_Update$onDeleteTodo = _elm_lang$core$Native_Platform.outgoingPort(
 	'onDeleteTodo',
@@ -8684,14 +8764,14 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 		var _p0 = msg;
 		switch (_p0.ctor) {
 			case 'NewTodo':
-				var newTodo = A3(_user$project$Todo_Model$constructTodo, '', model.todoTitleInputState, false);
+				var newTodo = A4(_user$project$Todo_Model$constructTodo, '', model.todoTitleInputState, false, model.currentProject);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{todoTitleInputState: ''}),
 					_1: _user$project$Todo_Update$onNewTodo(
-						{id: '', title: newTodo.title, done: newTodo.done})
+						{id: '', title: newTodo.title, done: newTodo.done, project: model.currentProject})
 				};
 			case 'DeleteTodo':
 				var _p1 = _p0._0;
@@ -8723,7 +8803,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 							model,
 							{lastDeletedTodo: _elm_lang$core$Maybe$Nothing}),
 						_1: _user$project$Todo_Update$onNewTodo(
-							{id: '', title: _p3.title, done: _p3.done})
+							{id: '', title: _p3.title, done: _p3.done, project: _p3.project})
 					};
 				}
 			case 'EditTodo':
@@ -8769,7 +8849,7 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 								todos: A2(_elm_lang$core$List$map, view, model.todos)
 							}),
 						_1: _user$project$Todo_Update$onUpdateTodo(
-							A3(_user$project$Todo_Firebase$TodoFirebase, _p6, _p5.title, _p5.done))
+							A4(_user$project$Todo_Firebase$TodoFirebase, _p6, _p5.title, _p5.done, _p5.project))
 					};
 				}
 			case 'UpdateTodoTitle':
@@ -8816,12 +8896,17 @@ var _user$project$Todo_Update$handleTodoAction = F2(
 								todos: A2(_elm_lang$core$List$map, update, model.todos)
 							}),
 						_1: _user$project$Todo_Update$onUpdateTodo(
-							A3(_user$project$Todo_Firebase$TodoFirebase, _p9, _p8.title, _p8.done))
+							A4(_user$project$Todo_Firebase$TodoFirebase, _p9, _p8.title, _p8.done, _p8.project))
 					};
 				}
 		}
 	});
 
+var _user$project$Update$onProjectSelect = _elm_lang$core$Native_Platform.outgoingPort(
+	'onProjectSelect',
+	function (v) {
+		return {id: v.id, title: v.title};
+	});
 var _user$project$Update$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
@@ -8840,17 +8925,66 @@ var _user$project$Update$update = F2(
 						model,
 						{todoTitleInputState: _p0._0}),
 					{ctor: '[]'});
-			default:
-				var makeTodo = function (fodo) {
-					return A3(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title, fodo.done);
+			case 'FirebaseUpdate':
+				var _p6 = _p0._0;
+				var convertProject = function (froject) {
+					return A2(_user$project$Project_Model$constructProject, froject.id, froject.title);
 				};
-				var todoList = A2(_elm_lang$core$List$map, makeTodo, _p0._0);
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_elm_lang$core$Native_Utils.update(
+				var projectList = function () {
+					var _p1 = _p6.projects;
+					if (_p1.ctor === 'Nothing') {
+						return model.projects;
+					} else {
+						return A2(_elm_lang$core$List$map, convertProject, _p1._0);
+					}
+				}();
+				var firstProject = _elm_lang$core$List$head(projectList);
+				var _p2 = function () {
+					if (_elm_lang$core$Native_Utils.eq(model.currentProject.id, '')) {
+						var _p3 = firstProject;
+						if (_p3.ctor === 'Nothing') {
+							return {ctor: '_Tuple2', _0: model.currentProject, _1: _elm_lang$core$Platform_Cmd$none};
+						} else {
+							var _p4 = _p3._0;
+							return {
+								ctor: '_Tuple2',
+								_0: _p4,
+								_1: _user$project$Update$onProjectSelect(_p4)
+							};
+						}
+					} else {
+						return {ctor: '_Tuple2', _0: model.currentProject, _1: _elm_lang$core$Platform_Cmd$none};
+					}
+				}();
+				var proj = _p2._0;
+				var next = _p2._1;
+				var convertTodo = function (fodo) {
+					return A4(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title, fodo.done, fodo.project);
+				};
+				var todoList = function () {
+					var _p5 = _p6.todos;
+					if (_p5.ctor === 'Nothing') {
+						return model.todos;
+					} else {
+						return A2(_elm_lang$core$List$map, convertTodo, _p5._0);
+					}
+				}();
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{todos: todoList}),
-					{ctor: '[]'});
+						{todos: todoList, projects: projectList, currentProject: proj}),
+					_1: next
+				};
+			default:
+				var _p7 = _p0._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentProject: _p7}),
+					_1: _user$project$Update$onProjectSelect(_p7)
+				};
 		}
 	});
 
@@ -8858,28 +8992,100 @@ var _user$project$App$init = A2(
 	_elm_lang$core$Platform_Cmd_ops['!'],
 	_user$project$Model$emptyModel,
 	{ctor: '[]'});
-var _user$project$App$todos = _elm_lang$core$Native_Platform.incomingPort(
-	'todos',
-	_elm_lang$core$Json_Decode$list(
+var _user$project$App$events = _elm_lang$core$Native_Platform.incomingPort(
+	'events',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (todos) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (projects) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{todos: todos, projects: projects});
+				},
+				A2(
+					_elm_lang$core$Json_Decode$field,
+					'projects',
+					_elm_lang$core$Json_Decode$oneOf(
+						{
+							ctor: '::',
+							_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$core$Json_Decode$map,
+									_elm_lang$core$Maybe$Just,
+									_elm_lang$core$Json_Decode$list(
+										A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (id) {
+												return A2(
+													_elm_lang$core$Json_Decode$andThen,
+													function (title) {
+														return _elm_lang$core$Json_Decode$succeed(
+															{id: id, title: title});
+													},
+													A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string)))),
+								_1: {ctor: '[]'}
+							}
+						})));
+		},
 		A2(
-			_elm_lang$core$Json_Decode$andThen,
-			function (id) {
-				return A2(
-					_elm_lang$core$Json_Decode$andThen,
-					function (title) {
-						return A2(
-							_elm_lang$core$Json_Decode$andThen,
-							function (done) {
-								return _elm_lang$core$Json_Decode$succeed(
-									{id: id, title: title, done: done});
-							},
-							A2(_elm_lang$core$Json_Decode$field, 'done', _elm_lang$core$Json_Decode$bool));
-					},
-					A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
-			},
-			A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
+			_elm_lang$core$Json_Decode$field,
+			'todos',
+			_elm_lang$core$Json_Decode$oneOf(
+				{
+					ctor: '::',
+					_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$core$Json_Decode$map,
+							_elm_lang$core$Maybe$Just,
+							_elm_lang$core$Json_Decode$list(
+								A2(
+									_elm_lang$core$Json_Decode$andThen,
+									function (id) {
+										return A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (title) {
+												return A2(
+													_elm_lang$core$Json_Decode$andThen,
+													function (done) {
+														return A2(
+															_elm_lang$core$Json_Decode$andThen,
+															function (project) {
+																return _elm_lang$core$Json_Decode$succeed(
+																	{id: id, title: title, done: done, project: project});
+															},
+															A2(
+																_elm_lang$core$Json_Decode$field,
+																'project',
+																A2(
+																	_elm_lang$core$Json_Decode$andThen,
+																	function (id) {
+																		return A2(
+																			_elm_lang$core$Json_Decode$andThen,
+																			function (title) {
+																				return _elm_lang$core$Json_Decode$succeed(
+																					{id: id, title: title});
+																			},
+																			A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+																	},
+																	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
+													},
+													A2(_elm_lang$core$Json_Decode$field, 'done', _elm_lang$core$Json_Decode$bool));
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+									},
+									A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string)))),
+						_1: {ctor: '[]'}
+					}
+				}))));
 var _user$project$App$subscriptions = function (model) {
-	return _user$project$App$todos(_user$project$Msg$FirebaseUpdate);
+	return _user$project$App$events(_user$project$Msg$FirebaseUpdate);
 };
 var _user$project$App$main = _elm_lang$html$Html$program(
 	{init: _user$project$App$init, view: _user$project$Views$view, update: _user$project$Update$update, subscriptions: _user$project$App$subscriptions})();
