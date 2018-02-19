@@ -15,11 +15,11 @@ type alias Model =
     , currentProject : Project
     }
 
--- Represents incoming data from Firebase.
-type alias FirebaseData =
-    { todos    : Maybe (List TodoFirebase)
-    , projects : Maybe (List ProjectFirebase)
-    }
+-- Incoming data from Firebase.
+type alias FirebaseProjectsList =
+    List ProjectFirebase
+type alias FirebaseTodosList =
+    List TodoFirebase
 
 -- The beginning state of the application.
 emptyModel : Model

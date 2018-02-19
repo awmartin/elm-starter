@@ -1,8 +1,7 @@
 port module Update exposing (update)
 
-import Array
 
-import Model exposing (Model, FirebaseData)
+import Model exposing (Model)
 import Msg exposing (..)
 
 import Todo.Model exposing (..)
@@ -28,23 +27,14 @@ update msg model =
         UpdateInput newTitle ->
             { model | todoTitleInputState = newTitle } ! []
 
-        FirebaseUpdate data ->
-            -- Converts all the Firebase objects into Todo instances.
-            let convertTodo : TodoFirebase -> Todo
-                convertTodo fodo =
-                    constructTodo fodo.id fodo.title fodo.done fodo.project
-                todoList =
-                    case data.todos of
-                        Nothing -> model.todos
-                        Just list -> List.map convertTodo list
+        SelectProject project ->
+            ({ model | currentProject = project }, onProjectSelect project)
 
-                convertProject : ProjectFirebase -> Project
+        FirebaseProjectsListUpdate frojects ->
+            let convertProject : ProjectFirebase -> Project
                 convertProject froject =
                     constructProject froject.id froject.title
-                projectList =
-                    case data.projects of
-                        Nothing -> model.projects
-                        Just list -> List.map convertProject list
+                projectList = List.map convertProject frojects
                 
                 -- Handle the bootstrapping case, select the first known project.
                 firstProject : Maybe Project
@@ -53,11 +43,16 @@ update msg model =
                 (proj, next) = if model.currentProject.id == "" then
                     case firstProject of
                         Nothing -> (model.currentProject, Cmd.none)
-                        Just project -> (project, onProjectSelect project)
+                        Just project -> (project, onProjectSelect project) -- Ensures the todo list is populated.
                     else
                         (model.currentProject, Cmd.none)
             in
-                ({ model | todos = todoList, projects = projectList, currentProject = proj }, next)
+                ({ model | projects = projectList, currentProject = proj }, next)
 
-        SelectProject project ->
-            ({ model | currentProject = project }, onProjectSelect project)
+        FirebaseTodosListUpdate fodos ->
+            let convertTodo : TodoFirebase -> Todo
+                convertTodo fodo =
+                    constructTodo fodo.id fodo.title fodo.done fodo.project
+                todoList = List.map convertTodo fodos
+            in
+                ({model | todos = todoList}, Cmd.none)

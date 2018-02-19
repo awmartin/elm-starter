@@ -8330,16 +8330,15 @@ var _user$project$Model$Model = F6(
 	function (a, b, c, d, e, f) {
 		return {todos: a, projects: b, todoTitleInputState: c, nextId: d, lastDeletedTodo: e, currentProject: f};
 	});
-var _user$project$Model$FirebaseData = F2(
-	function (a, b) {
-		return {todos: a, projects: b};
-	});
 
+var _user$project$Msg$FirebaseTodosListUpdate = function (a) {
+	return {ctor: 'FirebaseTodosListUpdate', _0: a};
+};
+var _user$project$Msg$FirebaseProjectsListUpdate = function (a) {
+	return {ctor: 'FirebaseProjectsListUpdate', _0: a};
+};
 var _user$project$Msg$SelectProject = function (a) {
 	return {ctor: 'SelectProject', _0: a};
-};
-var _user$project$Msg$FirebaseUpdate = function (a) {
-	return {ctor: 'FirebaseUpdate', _0: a};
 };
 var _user$project$Msg$TodoMsg = function (a) {
 	return {ctor: 'TodoMsg', _0: a};
@@ -8925,19 +8924,20 @@ var _user$project$Update$update = F2(
 						model,
 						{todoTitleInputState: _p0._0}),
 					{ctor: '[]'});
-			case 'FirebaseUpdate':
-				var _p6 = _p0._0;
+			case 'SelectProject':
+				var _p1 = _p0._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentProject: _p1}),
+					_1: _user$project$Update$onProjectSelect(_p1)
+				};
+			case 'FirebaseProjectsListUpdate':
 				var convertProject = function (froject) {
 					return A2(_user$project$Project_Model$constructProject, froject.id, froject.title);
 				};
-				var projectList = function () {
-					var _p1 = _p6.projects;
-					if (_p1.ctor === 'Nothing') {
-						return model.projects;
-					} else {
-						return A2(_elm_lang$core$List$map, convertProject, _p1._0);
-					}
-				}();
+				var projectList = A2(_elm_lang$core$List$map, convertProject, _p0._0);
 				var firstProject = _elm_lang$core$List$head(projectList);
 				var _p2 = function () {
 					if (_elm_lang$core$Native_Utils.eq(model.currentProject.id, '')) {
@@ -8958,32 +8958,24 @@ var _user$project$Update$update = F2(
 				}();
 				var proj = _p2._0;
 				var next = _p2._1;
-				var convertTodo = function (fodo) {
-					return A4(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title, fodo.done, fodo.project);
-				};
-				var todoList = function () {
-					var _p5 = _p6.todos;
-					if (_p5.ctor === 'Nothing') {
-						return model.todos;
-					} else {
-						return A2(_elm_lang$core$List$map, convertTodo, _p5._0);
-					}
-				}();
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{todos: todoList, projects: projectList, currentProject: proj}),
+						{projects: projectList, currentProject: proj}),
 					_1: next
 				};
 			default:
-				var _p7 = _p0._0;
+				var convertTodo = function (fodo) {
+					return A4(_user$project$Todo_Model$constructTodo, fodo.id, fodo.title, fodo.done, fodo.project);
+				};
+				var todoList = A2(_elm_lang$core$List$map, convertTodo, _p0._0);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{currentProject: _p7}),
-					_1: _user$project$Update$onProjectSelect(_p7)
+						{todos: todoList}),
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
@@ -8992,30 +8984,42 @@ var _user$project$App$init = A2(
 	_elm_lang$core$Platform_Cmd_ops['!'],
 	_user$project$Model$emptyModel,
 	{ctor: '[]'});
-var _user$project$App$events = _elm_lang$core$Native_Platform.incomingPort(
-	'events',
-	A2(
-		_elm_lang$core$Json_Decode$andThen,
-		function (todos) {
-			return A2(
-				_elm_lang$core$Json_Decode$andThen,
-				function (projects) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{todos: todos, projects: projects});
-				},
-				A2(
-					_elm_lang$core$Json_Decode$field,
-					'projects',
-					_elm_lang$core$Json_Decode$oneOf(
-						{
-							ctor: '::',
-							_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$core$Json_Decode$map,
-									_elm_lang$core$Maybe$Just,
-									_elm_lang$core$Json_Decode$list(
+var _user$project$App$projects = _elm_lang$core$Native_Platform.incomingPort(
+	'projects',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (id) {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (title) {
+						return _elm_lang$core$Json_Decode$succeed(
+							{id: id, title: title});
+					},
+					A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+			},
+			A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
+var _user$project$App$todos = _elm_lang$core$Native_Platform.incomingPort(
+	'todos',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (id) {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (title) {
+						return A2(
+							_elm_lang$core$Json_Decode$andThen,
+							function (done) {
+								return A2(
+									_elm_lang$core$Json_Decode$andThen,
+									function (project) {
+										return _elm_lang$core$Json_Decode$succeed(
+											{id: id, title: title, done: done, project: project});
+									},
+									A2(
+										_elm_lang$core$Json_Decode$field,
+										'project',
 										A2(
 											_elm_lang$core$Json_Decode$andThen,
 											function (id) {
@@ -9027,65 +9031,24 @@ var _user$project$App$events = _elm_lang$core$Native_Platform.incomingPort(
 													},
 													A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
 											},
-											A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string)))),
-								_1: {ctor: '[]'}
-							}
-						})));
-		},
-		A2(
-			_elm_lang$core$Json_Decode$field,
-			'todos',
-			_elm_lang$core$Json_Decode$oneOf(
-				{
-					ctor: '::',
-					_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$core$Json_Decode$map,
-							_elm_lang$core$Maybe$Just,
-							_elm_lang$core$Json_Decode$list(
-								A2(
-									_elm_lang$core$Json_Decode$andThen,
-									function (id) {
-										return A2(
-											_elm_lang$core$Json_Decode$andThen,
-											function (title) {
-												return A2(
-													_elm_lang$core$Json_Decode$andThen,
-													function (done) {
-														return A2(
-															_elm_lang$core$Json_Decode$andThen,
-															function (project) {
-																return _elm_lang$core$Json_Decode$succeed(
-																	{id: id, title: title, done: done, project: project});
-															},
-															A2(
-																_elm_lang$core$Json_Decode$field,
-																'project',
-																A2(
-																	_elm_lang$core$Json_Decode$andThen,
-																	function (id) {
-																		return A2(
-																			_elm_lang$core$Json_Decode$andThen,
-																			function (title) {
-																				return _elm_lang$core$Json_Decode$succeed(
-																					{id: id, title: title});
-																			},
-																			A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
-																	},
-																	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
-													},
-													A2(_elm_lang$core$Json_Decode$field, 'done', _elm_lang$core$Json_Decode$bool));
-											},
-											A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
-									},
-									A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string)))),
-						_1: {ctor: '[]'}
-					}
-				}))));
+											A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
+							},
+							A2(_elm_lang$core$Json_Decode$field, 'done', _elm_lang$core$Json_Decode$bool));
+					},
+					A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string));
+			},
+			A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string))));
 var _user$project$App$subscriptions = function (model) {
-	return _user$project$App$events(_user$project$Msg$FirebaseUpdate);
+	return _elm_lang$core$Platform_Sub$batch(
+		{
+			ctor: '::',
+			_0: _user$project$App$projects(_user$project$Msg$FirebaseProjectsListUpdate),
+			_1: {
+				ctor: '::',
+				_0: _user$project$App$todos(_user$project$Msg$FirebaseTodosListUpdate),
+				_1: {ctor: '[]'}
+			}
+		});
 };
 var _user$project$App$main = _elm_lang$html$Html$program(
 	{init: _user$project$App$init, view: _user$project$Views$view, update: _user$project$Update$update, subscriptions: _user$project$App$subscriptions})();

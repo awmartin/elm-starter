@@ -118,19 +118,25 @@
       document.getElementById('quickstart-sign-in').addEventListener('click', toggleSignIn, false);
     }
 
+    // Subscribe to the todos of a given project.
+    // Do so by querying against a project ref.
     function subscribeToProjectTodos(app, db, user, project){
         // Unsubscribe.
         if (state.projectSubscription) { state.projectSubscription(); }
 
+        // Compute the project reference.
         var projectRef = null,
             projectData = null;
         if (project.ref) {
             projectRef = project.ref;
             projectData = project.data();
             projectData.id = project.id;
-        } else {
+        } else if (project.id) {
             projectRef = db.collection('accounts').doc(user.uid).collection('projects').doc(project.id);
             projectData = project;
+        } else {
+            console.error("Couldn't find a project ref from the given project value:", project);
+            return;
         }
 
         var projectTodos = db.collection('accounts')
@@ -146,7 +152,7 @@
                 todo.project = projectData;
                 list.push(todo);
             });
-            app.ports.events.send({todos:list, projects:null});
+            app.ports.todos.send(list);
         });
     }
 
@@ -164,9 +170,10 @@
                 project.id = doc.id;
                 list.push(project);
             });
-            app.ports.events.send({todos: null, projects:list});
+            app.ports.projects.send(list);
         });
 
+        // When a project is selected, update the todos subscription.
         app.ports.onProjectSelect.subscribe(function(project){
             subscribeToProjectTodos(app, db, user, project);
         });
@@ -204,7 +211,7 @@
     }
 
     window.onload = function() {
-      initApp();
+        initApp();
     };
   </script>
 </body>
